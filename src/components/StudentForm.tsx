@@ -20,7 +20,7 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
         isInternational: false,
         nationality: '',
         nativeLanguage: '',
-        languageLevels: [{ language: '', level: 'A1' }],
+        languageLevels: [],
         hasASD: false,
         academicLevels: {
             mathematics: 'Medio',
@@ -244,7 +244,6 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
                                         </option>
                                     ))}
                                 </select>
-                                {index > 0 && (
                                     <button
                                         type="button"
                                         onClick={() => removeLanguage(index)}
@@ -252,7 +251,6 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
                                     >
                                         <Minus className="w-5 h-5" />
                                     </button>
-                                )}
                             </div>
                         ))}
                     </div>
