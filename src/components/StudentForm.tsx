@@ -9,6 +9,7 @@ const ACADEMIC_LEVELS: AcademicLevel[] = ['Bajo', 'Medio-Bajo', 'Medio', 'Medio-
 interface StudentFormProps {
     onSubmit: (student: Omit<Student, 'id'>) => void;
     onCancel: () => void;
+    availableSubjects: string[];
     initialData?: Student;
 }
 

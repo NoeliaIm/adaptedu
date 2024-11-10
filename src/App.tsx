@@ -41,10 +41,15 @@ function App() {
     };
 
     const addSubject = () => {
-        setFormData((prev) => ({
-            ...prev,
-            subjects: [...prev.subjects, { id: crypto.randomUUID(), name: '' }],
-        }));
+        const availableSubjects = AVAILABLE_SUBJECTS.filter(
+            (subject) => !formData.subjects.some((s) => s.id === subject.id)
+        );
+        if (availableSubjects.length > 0) {
+            setFormData((prev) => ({
+                ...prev,
+                subjects: [...prev.subjects, { ...availableSubjects[0] }],
+            }));
+        }
     };
 
     const removeSubject = (id: string) => {
@@ -69,7 +74,7 @@ function App() {
         }
     };
 
-    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFilters((prev) => ({
             ...prev,
