@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import TeacherForm from './components/TeacherForm';
 import StudentSearch from './components/StudentSearch.tsx';
 import StudentForm from './components/StudentForm';
-import { Student, TeacherForm as TeacherFormType } from './types';
+import { Student, TeacherForm as TeacherFormType  , Subject} from './types';
 import { mockStudents } from './mockData';
+import { AVAILABLE_SUBJECTS } from './types/subjects';
 
 function App() {
     const [formData, setFormData] = useState<TeacherFormType>({
         firstName: '',
         lastName: '',
-        subjects: [{ id: crypto.randomUUID(), name: '' }],
+        subjects: [{ ...AVAILABLE_SUBJECTS[0] }],
     });
 
     const [submitted, setSubmitted] = useState(false);
@@ -30,11 +31,11 @@ function App() {
         }));
     };
 
-    const handleSubjectChange = (id: string, value: string) => {
+    const handleSubjectChange = (id: string, newSubject: Subject) => {
         setFormData((prev) => ({
             ...prev,
             subjects: prev.subjects.map((subject) =>
-                subject.id === id ? { ...subject, name: value } : subject
+                subject.id === id ? newSubject : subject
             ),
         }));
     };
@@ -124,10 +125,6 @@ function App() {
         setSelectedStudent(null);
     };
 
-    const handleViewAcademicRecord = (studentId: string) => {
-        console.log('View academic record for student:', studentId);
-    };
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto space-y-8">
@@ -138,9 +135,8 @@ function App() {
                             setShowStudentForm(false);
                             setSelectedStudent(null);
                         }}
-                        availableSubjects={formData.subjects.map((s) => s.name).filter(Boolean)}
+                        availableSubjects={formData.subjects.map((s) => s.name)}
                         initialData={selectedStudent || undefined}
-                        onViewAcademicRecord={handleViewAcademicRecord}
                     />
                 ) : (
                     <>

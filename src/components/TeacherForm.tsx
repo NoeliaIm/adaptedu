@@ -1,11 +1,12 @@
 import React from 'react';
 import { PlusCircle, MinusCircle, GraduationCap, Save } from 'lucide-react';
-import { TeacherForm } from '../types';
+import { TeacherForm, Subject } from '../types';
+import { AVAILABLE_SUBJECTS } from '../types/subjects';
 
 interface TeacherFormProps {
     formData: TeacherForm;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onSubjectChange: (id: string, value: string) => void;
+    onSubjectChange: (id: string, subject: Subject) => void;
     onAddSubject: () => void;
     onRemoveSubject: (id: string) => void;
     onSubmit: (e: React.FormEvent) => void;
@@ -23,6 +24,11 @@ export default function TeacherFormComponent({
                                                  isFormValid,
                                                  submitted,
                                              }: TeacherFormProps) {
+    const getAvailableSubjects = () => {
+        return AVAILABLE_SUBJECTS.filter(
+            (subject) => !formData.subjects.some((s) => s.id === subject.id)
+        );
+    };
     return (
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
             <div className="flex items-center gap-3 mb-8">
@@ -73,24 +79,35 @@ export default function TeacherFormComponent({
                         <button
                             type="button"
                             onClick={onAddSubject}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={getAvailableSubjects().length === 0}
                         >
                             <PlusCircle className="w-4 h-4 mr-1" />
                             Añadir Asignatura
                         </button>
                     </div>
 
-                    {formData.subjects.map((subject, index) => (
+                    {formData.subjects.map((subject) => (
                         <div key={subject.id} className="flex items-center gap-2">
-                            <input
-                                type="text"
-                                value={subject.name}
-                                onChange={(e) => onSubjectChange(subject.id, e.target.value)}
-                                placeholder={`Asignatura ${index + 1}`}
+                            <select
+                                value={subject.id}
+                                onChange={(e) => {
+                                    const selectedSubject = AVAILABLE_SUBJECTS.find(s => s.id === e.target.value);
+                                    if (selectedSubject) {
+                                        onSubjectChange(subject.id, selectedSubject);
+                                    }
+                                }}
                                 className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm
                   border p-2 transition duration-150 ease-in-out"
                                 required
-                            />
+                            >
+                                <option value={subject.id}>{subject.name} - {subject.description}</option>
+                                {getAvailableSubjects().map((availableSubject) => (
+                                    <option key={availableSubject.id} value={availableSubject.id}>
+                                        {availableSubject.name} - {availableSubject.description}
+                                    </option>
+                                ))}
+                            </select>
                             <button
                                 type="button"
                                 onClick={() => onRemoveSubject(subject.id)}
@@ -123,7 +140,7 @@ export default function TeacherFormComponent({
                     <p><strong>Asignaturas:</strong></p>
                     <ul className="list-disc list-inside ml-4">
                         {formData.subjects.map((subject) => (
-                            <li key={subject.id}>{subject.name}</li>
+                            <li key={subject.id}>{subject.name} - {subject.description}</li>
                         ))}
                     </ul>
                 </div>

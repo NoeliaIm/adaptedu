@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, UserPlus, PencilIcon } from 'lucide-react';
 import { Student } from '../types';
+import {AVAILABLE_SUBJECTS} from "../types/subjects.ts";
 
 interface StudentSearchProps {
     filters: {
@@ -8,7 +9,7 @@ interface StudentSearchProps {
         lastName: string;
         subject: string;
     };
-    onFilterChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onFilterChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     filteredStudents: Student[];
     onAddStudent: () => void;
     onEditStudent: (student: Student) => void;
@@ -76,33 +77,38 @@ export default function StudentSearch({
         Asignatura
         </label>
         <div className="mt-1 relative rounded-md shadow-sm">
-    <input
-        type="text"
-    name="subject"
-    id="searchSubject"
-    value={filters.subject}
-    onChange={onFilterChange}
-    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm
-    border p-2 transition duration-150 ease-in-out"
-    placeholder="Buscar por asignatura"
-        />
+            <select
+                name="subject"
+                id="searchSubject"
+                value={filters.subject}
+                onChange={onFilterChange}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm
+                border p-2 transition duration-150 ease-in-out"
+            >
+                <option value="">Todas las asignaturas</option>
+                {AVAILABLE_SUBJECTS.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                        {subject.name} - {subject.description}
+                    </option>
+                ))}
+            </select>
         </div>
-        </div>
-        </div>
+    </div>
+    </div>
 
-    {filteredStudents.length > 0 ? (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-        <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Nombre
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-        Apellidos
-        </th>
-        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-        Asignaturas
+            {filteredStudents.length > 0 ? (
+                <div className="overflow-hidden rounded-lg border border-gray-200">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Nombre
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Apellidos
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Asignaturas
         </th>
         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
         Acciones

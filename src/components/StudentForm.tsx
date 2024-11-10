@@ -1,39 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, Plus, Minus } from 'lucide-react';
 import type { Student, LanguageLevel, AcademicLevel } from '../types';
+import { AVAILABLE_SUBJECTS } from '../types/subjects';
 
 const LANGUAGE_LEVELS: LanguageLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const ACADEMIC_LEVELS: AcademicLevel[] = ['Bajo', 'Medio-Bajo', 'Medio', 'Medio-Alto', 'Alto'];
 
 interface StudentFormProps {
     onSubmit: (student: Omit<Student, 'id'>) => void;
-    availableSubjects: string[];
     onCancel: () => void;
+    initialData?: Student;
 }
 
-export default function StudentForm({ onSubmit, availableSubjects, onCancel }: StudentFormProps) {
-    const [formData, setFormData] = useState<Omit<Student, 'id'>>({
-        firstName: '',
-        lastName: '',
-        recordNumber: '',
-        subjects: [],
-        isInternational: false,
-        nationality: '',
-        nativeLanguage: '',
-        languageLevels: [],
-        hasASD: false,
-        academicLevels: {
-            mathematics: 'Medio',
-            literature: 'Medio',
-            english: 'Medio',
-            history: 'Medio',
-        },
-        specialNeeds: {
-            adhd: false,
-            highAbilities: false,
-            pas: false,
-        },
-    });
+const defaultFormData: Omit<Student, 'id'> = {
+    firstName: '',
+    lastName: '',
+    recordNumber: '',
+    subjects: [],
+    isInternational: false,
+    nationality: '',
+    nativeLanguage: '',
+    languageLevels: [],
+    hasASD: false,
+    academicLevels: {
+        mathematics: 'Medio',
+        literature: 'Medio',
+        english: 'Medio',
+        history: 'Medio',
+    },
+    specialNeeds: {
+        adhd: false,
+        highAbilities: false,
+        pas: false,
+    },
+};
+
+export default function StudentForm({
+                                        onSubmit,
+                                        onCancel,
+                                        initialData,
+                                    }: StudentFormProps) {
+    const [formData, setFormData] = useState<Omit<Student, 'id'>>(defaultFormData);
+
+    // Cargar datos iniciales cuando se edita un estudiante existente
+    useEffect(() => {
+        if (initialData) {
+            const { id, ...studentData } = initialData;
+            setFormData(studentData);
+        }
+    }, [initialData]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target as HTMLInputElement;
@@ -45,13 +60,38 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
         }));
     };
 
-    const handleSubjectToggle = (subject: string) => {
+    const handleSubjectAdd = () => {
+        const availableSubjects = AVAILABLE_SUBJECTS.filter(
+            (subject) => !formData.subjects.includes(subject.id)
+        );
+        if (availableSubjects.length > 0) {
+            setFormData((prev) => ({
+                ...prev,
+                subjects: [...prev.subjects, availableSubjects[0].id],
+            }));
+        }
+    };
+
+    const handleSubjectChange = (index: number, subjectId: string) => {
         setFormData((prev) => ({
             ...prev,
-            subjects: prev.subjects.includes(subject)
-                ? prev.subjects.filter((s) => s !== subject)
-                : [...prev.subjects, subject],
+            subjects: prev.subjects.map((s, i) => (i === index ? subjectId : s)),
         }));
+    };
+
+    const removeSubject = (index: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            subjects: prev.subjects.filter((_, i) => i !== index),
+        }));
+    };
+
+    const getAvailableSubjects = (currentSubjectId?: string) => {
+        return AVAILABLE_SUBJECTS.filter(
+            (subject) =>
+                subject.id === currentSubjectId ||
+                !formData.subjects.includes(subject.id)
+        );
     };
 
     const handleLanguageLevelChange = (index: number, field: 'language' | 'level', value: string) => {
@@ -145,18 +185,40 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
 
                 {/* Subjects */}
                 <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Asignaturas</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        {availableSubjects.map((subject) => (
-                            <label key={subject} className="inline-flex items-center">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.subjects.includes(subject)}
-                                    onChange={() => handleSubjectToggle(subject)}
-                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                />
-                                <span className="ml-2 text-sm text-gray-700">{subject}</span>
-                            </label>
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-medium text-gray-900">Asignaturas</h3>
+                        <button
+                            type="button"
+                            onClick={handleSubjectAdd}
+                            disabled={getAvailableSubjects().length === 0}
+                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Plus className="w-4 h-4 mr-1"/>
+                            Añadir Asignatura
+                        </button>
+                    </div>
+                    <div className="space-y-3">
+                        {formData.subjects.map((subjectId, index) => (
+                            <div key={index} className="flex gap-4 items-center">
+                                <select
+                                    value={subjectId}
+                                    onChange={(e) => handleSubjectChange(index, e.target.value)}
+                                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    {getAvailableSubjects(subjectId).map((subject) => (
+                                        <option key={subject.id} value={subject.id}>
+                                            {subject.name} - {subject.description}
+                                        </option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={() => removeSubject(index)}
+                                    className="p-2 text-gray-400 hover:text-red-500"
+                                >
+                                    <Minus className="w-5 h-5"/>
+                                </button>
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -219,7 +281,7 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
                                 onClick={addLanguage}
                                 className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-50 hover:bg-indigo-100"
                             >
-                                <Plus className="w-4 h-4 mr-1" />
+                                <Plus className="w-4 h-4 mr-1"/>
                                 Añadir Idioma
                             </button>
                         </div>
@@ -244,13 +306,13 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
                                         </option>
                                     ))}
                                 </select>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeLanguage(index)}
-                                        className="p-2 text-gray-400 hover:text-red-500"
-                                    >
-                                        <Minus className="w-5 h-5" />
-                                    </button>
+                                <button
+                                    type="button"
+                                    onClick={() => removeLanguage(index)}
+                                    className="p-2 text-gray-400 hover:text-red-500"
+                                >
+                                    <Minus className="w-5 h-5"/>
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -283,7 +345,7 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
                                 onChange={(e) =>
                                     setFormData((prev) => ({
                                         ...prev,
-                                        specialNeeds: { ...prev.specialNeeds, adhd: e.target.checked },
+                                        specialNeeds: {...prev.specialNeeds, adhd: e.target.checked},
                                     }))
                                 }
                                 className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -298,7 +360,7 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
                                 onChange={(e) =>
                                     setFormData((prev) => ({
                                         ...prev,
-                                        specialNeeds: { ...prev.specialNeeds, highAbilities: e.target.checked },
+                                        specialNeeds: {...prev.specialNeeds, highAbilities: e.target.checked},
                                     }))
                                 }
                                 className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -313,7 +375,7 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
                                 onChange={(e) =>
                                     setFormData((prev) => ({
                                         ...prev,
-                                        specialNeeds: { ...prev.specialNeeds, pas: e.target.checked },
+                                        specialNeeds: {...prev.specialNeeds, pas: e.target.checked},
                                     }))
                                 }
                                 className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -367,7 +429,7 @@ export default function StudentForm({ onSubmit, availableSubjects, onCancel }: S
                     type="submit"
                     className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                    <Save className="w-4 h-4 mr-2" />
+                    <Save className="w-4 h-4 mr-2"/>
                     Guardar Alumno
                 </button>
             </div>
