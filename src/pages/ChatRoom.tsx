@@ -15,23 +15,25 @@ interface Message {
 function ChatRoom() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const chatRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSend = async () => {
-        if (!input.trim() && !fileInputRef.current?.files?.length) return;
+        if (!input.trim() && !selectedFile) return;
 
         const userMessage: Message = {
             id: crypto.randomUUID(),
             text: input,
             sender: 'user',
             timestamp: new Date(),
-            file: fileInputRef.current?.files?.[0]
+            file: selectedFile || undefined
         };
 
         setMessages(prev => [...prev, userMessage]);
         setInput('');
+        setSelectedFile(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
         setIsLoading(true);
 
@@ -52,6 +54,12 @@ function ChatRoom() {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setSelectedFile(e.target.files[0]);
         }
     };
 
@@ -165,37 +173,61 @@ function ChatRoom() {
 
             {/* Input Area */}
             <div className="bg-white border-t border-gray-200 px-6 py-4">
-                <div className="flex items-end space-x-4">
-                    <div className="flex-1">
-            <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                className="w-full resize-none rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 p-3 text-sm"
-                rows={1}
-            />
-                    </div>
-                    <div className="flex space-x-2">
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            className="hidden"
-                            onChange={() => handleSend()}
-                        />
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                        >
-                            <FileUp className="w-5 h-5 text-gray-600" />
-                        </button>
-                        <button
-                            onClick={handleSend}
-                            disabled={!input.trim() && !fileInputRef.current?.files?.length}
-                            className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <Send className="w-5 h-5 text-white" />
-                        </button>
+                <div className="flex flex-col space-y-2">
+                    {selectedFile && (
+                        <div className="flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                            <Paperclip className="w-4 h-4" />
+                            <span>{selectedFile.name}</span>
+                            <button
+                                onClick={() => {
+                                    setSelectedFile(null);
+                                    if (fileInputRef.current) fileInputRef.current.value = '';
+                                }}
+                                className="text-red-500 hover:text-red-700 ml-auto"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    )}
+                    <div className="flex items-end space-x-4">
+                        <div className="flex-1">
+              <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type your message..."
+                  className="w-full resize-none rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 p-3 text-sm"
+                  rows={1}
+              />
+                        </div>
+                        <div className="flex space-x-2">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+                            <div className="relative group">
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                                >
+                                    <FileUp className="w-5 h-5 text-gray-600" />
+                                </button>
+                                <div className="absolute bottom-full mb-2 hidden group-hover:block">
+                                    <div className="bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                        Adjuntar archivo
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleSend}
+                                disabled={!input.trim() && !selectedFile}
+                                className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Send className="w-5 h-5 text-white" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
