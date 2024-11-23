@@ -1,13 +1,15 @@
 import { FileText, Calendar, HardDrive } from 'lucide-react';
+import { AVAILABLE_SUBJECTS } from '../types/subjects';
 
 interface ReviewStepProps {
     selectedFile: File | null;
+    selectedSubject: string;
+    onSubjectChange: (subjectId: string) => void;
 }
 
-function ReviewStep({ selectedFile }: ReviewStepProps) {
+function ReviewStep({ selectedFile, selectedSubject, onSubjectChange }: ReviewStepProps) {
     if (!selectedFile) return null;
 
-    // @ts-ignore
     return (
         <div>
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -50,18 +52,37 @@ function ReviewStep({ selectedFile }: ReviewStepProps) {
                                     month: 'long',
                                     day: 'numeric',
                                     hour: '2-digit',
-                                    minute: '2-digit'
+                                    minute: '2-digit',
                                 })}
                             </p>
                         </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block font-medium text-gray-800">
+                            Asignatura
+                        </label>
+                        <select
+                            value={selectedSubject}
+                            onChange={(e) => onSubjectChange(e.target.value)}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            required
+                        >
+                            <option value="">Selecciona una asignatura</option>
+                            {AVAILABLE_SUBJECTS.map((subject) => (
+                                <option key={subject.id} value={subject.id}>
+                                    {subject.name} - {subject.description}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 </div>
             </div>
 
             <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
-                    ℹ️ Verifica que la información sea correcta antes de continuar.
-                    Una vez iniciada la subida, no podrás cancelar el proceso.
+                    ℹ️ Verifica que la información sea correcta antes de continuar. Una
+                    vez iniciada la subida, no podrás cancelar el proceso.
                 </p>
             </div>
         </div>

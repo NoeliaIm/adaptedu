@@ -1,5 +1,5 @@
-import React from 'react';
-import { PlusCircle, MinusCircle, GraduationCap, Save } from 'lucide-react';
+import React, {useState} from 'react';
+import { PlusCircle, MinusCircle, GraduationCap, Save, X } from 'lucide-react';
 import { TeacherForm, Subject } from '../types';
 import { AVAILABLE_SUBJECTS } from '../types/subjects';
 
@@ -24,6 +24,8 @@ export default function TeacherFormComponent({
                                                  isFormValid,
                                                  submitted,
                                              }: TeacherFormProps) {
+    const [showSummary, setShowSummary] = useState(true);
+
     const getAvailableSubjects = () => {
         return AVAILABLE_SUBJECTS.filter(
             (subject) => !formData.subjects.some((s) => s.id === subject.id)
@@ -132,8 +134,14 @@ export default function TeacherFormComponent({
                 </div>
             </form>
 
-            {submitted && (
-                <div className="mt-6 p-4 bg-green-50 rounded-md">
+            {submitted && showSummary && (
+                <div className="mt-6 p-4 bg-green-50 rounded-md relative">
+                    <button
+                        onClick={() => setShowSummary(false)}
+                        className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
                     <h2 className="text-lg font-semibold text-green-800 mb-2">Datos Registrados:</h2>
                     <p><strong>Nombre:</strong> {formData.firstName}</p>
                     <p><strong>Apellidos:</strong> {formData.lastName}</p>

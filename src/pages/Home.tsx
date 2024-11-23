@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import TeacherForm from '../components/TeacherForm';
-import StudentSearch from '../components/StudentSearch.tsx';
+import StudentSearch from '../components/StudentSearch';
 import StudentForm from '../components/StudentForm';
-import { Student, TeacherForm as TeacherFormType  , Subject} from '../types';
-import { mockStudents } from '../mockData';
-import { AVAILABLE_SUBJECTS } from '../types/subjects';
-import { ArrowRight, ArrowLeft, RefreshCw } from 'lucide-react';
+import {Student, Subject, TeacherForm as TeacherFormType} from '../types';
+import {mockStudents} from '../mockData';
+import {AVAILABLE_SUBJECTS} from '../types/subjects';
+import {ArrowRight, ArrowLeft, RefreshCw} from 'lucide-react';
 import FileUploadStep from '../components/FileUploadStep';
 import ReviewStep from '../components/ReviewStep';
 import ConfirmationStep from '../components/ConfirmationStep';
@@ -14,7 +14,7 @@ function Home() {
     const [formData, setFormData] = useState<TeacherFormType>({
         firstName: '',
         lastName: '',
-        subjects: [{ ...AVAILABLE_SUBJECTS[0] }],
+        subjects: [{...AVAILABLE_SUBJECTS[0]}],
     });
 
     const [submitted, setSubmitted] = useState(false);
@@ -29,11 +29,14 @@ function Home() {
 
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [selectedSubject, setSelectedSubject] = useState('');
     const [uploadProgress, setUploadProgress] = useState(0);
-    const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+    const [uploadStatus, setUploadStatus] = useState<
+        'idle' | 'uploading' | 'success' | 'error'
+    >('idle');
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: value,
@@ -56,7 +59,7 @@ function Home() {
         if (availableSubjects.length > 0) {
             setFormData((prev) => ({
                 ...prev,
-                subjects: [...prev.subjects, { ...availableSubjects[0] }],
+                subjects: [...prev.subjects, {...availableSubjects[0]}],
             }));
         }
     };
@@ -83,8 +86,10 @@ function Home() {
         }
     };
 
-    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+    const handleFilterChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        const {name, value} = e.target;
         setFilters((prev) => ({
             ...prev,
             [name]: value,
@@ -124,7 +129,7 @@ function Home() {
             setStudents((prev) =>
                 prev.map((student) =>
                     student.id === selectedStudent.id
-                        ? { ...studentData, id: student.id }
+                        ? {...studentData, id: student.id}
                         : student
                 )
             );
@@ -139,7 +144,7 @@ function Home() {
         setSelectedStudent(null);
     };
 
-    const handleFileSelect = (file: File) => {
+    const handleFileSelect = (file: File | null) => {
         setSelectedFile(file);
     };
 
@@ -174,6 +179,7 @@ function Home() {
     const handleReset = () => {
         setCurrentStep(1);
         setSelectedFile(null);
+        setSelectedSubject('');
         setUploadProgress(0);
         setUploadStatus('idle');
     };
@@ -189,7 +195,8 @@ function Home() {
                             setSelectedStudent(null);
                         }}
                         availableSubjects={formData.subjects.map((s) => s.name)}
-                        initialData={selectedStudent || undefined}/>
+                        initialData={selectedStudent || undefined}
+                    />
                 ) : (
                     <>
                         <TeacherForm
@@ -200,14 +207,16 @@ function Home() {
                             onRemoveSubject={removeSubject}
                             onSubmit={handleSubmit}
                             isFormValid={isFormValid}
-                            submitted={submitted}/>
+                            submitted={submitted}
+                        />
 
                         <StudentSearch
                             filters={filters}
                             onFilterChange={handleFilterChange}
                             filteredStudents={filteredStudents}
                             onAddStudent={handleAddStudent}
-                            onEditStudent={handleEditStudent}/>
+                            onEditStudent={handleEditStudent}
+                        />
 
                         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
                             <div className="max-w-2xl mx-auto">
@@ -227,19 +236,36 @@ function Home() {
                                         className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2 z-0"/>
                                     <div
                                         className="absolute top-1/2 left-0 right-0 h-1 bg-blue-500 -translate-y-1/2 z-0"
-                                        style={{width: `${((currentStep - 1) / 2) * 100}%`}}/>
+                                        style={{width: `${((currentStep - 1) / 2) * 100}%`}}
+                                    />
 
                                     {[1, 2, 3].map((step) => (
-                                        <div key={step} className="relative z-10 flex flex-col items-center">
+                                        <div
+                                            key={step}
+                                            className="relative z-10 flex flex-col items-center"
+                                        >
                                             <div
-                                                className={`w-10 h-10 rounded-full flex items-center justify-center ${step <= currentStep ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+                                                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                                    step <= currentStep
+                                                        ? 'bg-blue-500 text-white'
+                                                        : 'bg-gray-200 text-gray-500'
+                                                }`}
                                             >
                                                 {step}
                                             </div>
                                             <span
-                                                className={`mt-2 text-sm ${step <= currentStep ? 'text-blue-500' : 'text-gray-500'}`}>
-                                                    {step === 1 ? 'Selección' : step === 2 ? 'Revisión' : 'Confirmación'}
-                                                </span>
+                                                className={`mt-2 text-sm ${
+                                                    step <= currentStep
+                                                        ? 'text-blue-500'
+                                                        : 'text-gray-500'
+                                                }`}
+                                            >
+                        {step === 1
+                            ? 'Selección'
+                            : step === 2
+                                ? 'Revisión'
+                                : 'Confirmación'}
+                      </span>
                                         </div>
                                     ))}
                                 </div>
@@ -249,16 +275,22 @@ function Home() {
                                     {currentStep === 1 && (
                                         <FileUploadStep
                                             onFileSelect={handleFileSelect}
-                                            selectedFile={selectedFile}/>
+                                            selectedFile={selectedFile}
+                                        />
                                     )}
                                     {currentStep === 2 && (
                                         <ReviewStep
-                                            selectedFile={selectedFile}/>
+                                            selectedFile={selectedFile}
+                                            selectedSubject={selectedSubject}
+                                            onSubjectChange={setSelectedSubject}
+                                        />
                                     )}
                                     {currentStep === 3 && (
                                         <ConfirmationStep
                                             uploadProgress={uploadProgress}
-                                            uploadStatus={uploadStatus}/>
+                                            uploadStatus={uploadStatus}
+                                            selectedSubject={selectedSubject}
+                                        />
                                     )}
                                 </div>
 
@@ -285,11 +317,17 @@ function Home() {
                                         currentStep < 4 && (
                                             <button
                                                 onClick={handleNext}
-                                                disabled={!selectedFile || (currentStep === 3 && uploadStatus === 'uploading')}
+                                                disabled={
+                                                    !selectedFile ||
+                                                    (currentStep === 2 && !selectedSubject) ||
+                                                    (currentStep === 3 && uploadStatus === 'uploading')
+                                                }
                                                 className={`flex items-center px-6 py-3 ml-auto rounded-lg
-                  ${!selectedFile
-                                                    ? 'bg-gray-300 cursor-not-allowed'
-                                                    : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                          ${
+                                                    !selectedFile || (currentStep === 2 && !selectedSubject) || (currentStep === 3 && uploadStatus === 'uploading')
+                                                        ? 'bg-gray-300 cursor-not-allowed'
+                                                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                                }`}
                                             >
                                                 {currentStep === 3 ? 'Subir archivo' : 'Siguiente'}
                                                 <ArrowRight className="w-4 h-4 ml-2"/>

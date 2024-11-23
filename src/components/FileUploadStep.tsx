@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
-import { Upload, File } from 'lucide-react';
+import { Upload, File, X } from 'lucide-react';
 
 interface FileUploadStepProps {
-    onFileSelect: (file: File) => void;
+    onFileSelect: (file: File | null) => void;
     selectedFile: File | null;
 }
 
@@ -31,6 +31,13 @@ function FileUploadStep({ onFileSelect, selectedFile }: FileUploadStepProps) {
         }
     };
 
+    const handleRemoveFile = () => {
+        onFileSelect(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     return (
         <div className="text-center">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -38,11 +45,14 @@ function FileUploadStep({ onFileSelect, selectedFile }: FileUploadStepProps) {
             </h2>
 
             <div
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => !selectedFile && fileInputRef.current?.click()}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-4 cursor-pointer
-                 hover:border-blue-500 transition-colors duration-200"
+                className={`border-2 border-dashed rounded-lg p-8 mb-4 ${
+                    selectedFile
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-300 hover:border-blue-500 cursor-pointer'
+                } transition-colors duration-200`}
             >
                 <input
                     type="file"
@@ -52,18 +62,24 @@ function FileUploadStep({ onFileSelect, selectedFile }: FileUploadStepProps) {
                 />
 
                 {selectedFile ? (
-                    <div className="flex items-center justify-center space-x-3">
-                        <File className="w-8 h-8 text-blue-500" />
+                    <div className="flex items-center justify-center space-x-3 relative">
+                        <File className="w-8 h-8 text-blue-500"/>
                         <div className="text-left">
                             <p className="font-medium text-gray-800">{selectedFile.name}</p>
                             <p className="text-sm text-gray-500">
                                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                             </p>
                         </div>
+                        <button
+                            onClick={handleRemoveFile}
+                            className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-md hover:bg-gray-100"
+                        >
+                            <X className="w-4 h-4 text-gray-500"/>
+                        </button>
                     </div>
                 ) : (
                     <div>
-                        <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4"/>
                         <p className="text-gray-600 mb-2">
                             Arrastra y suelta tu archivo aquí o
                         </p>
@@ -76,7 +92,7 @@ function FileUploadStep({ onFileSelect, selectedFile }: FileUploadStepProps) {
 
             <p className="text-sm text-gray-500">
                 Formatos soportados: PDF, DOC, DOCX, XLS, XLSX
-                <br />
+                <br/>
                 Tamaño máximo: 10MB
             </p>
         </div>
