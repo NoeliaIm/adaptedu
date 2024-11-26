@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import TeacherForm from '../components/TeacherForm';
 import StudentSearch from '../components/StudentSearch';
 import StudentForm from '../components/StudentForm';
+import SubjectList from '../components/SubjectList';
 import {Student, Subject, TeacherForm as TeacherFormType} from '../types';
 import {mockStudents} from '../mockData';
 import {AVAILABLE_SUBJECTS} from '../types/subjects';
@@ -156,6 +157,10 @@ function Home() {
                             onSubmit={handleSubmit}
                             isFormValid={isFormValid}
                             submitted={submitted}
+                        />
+
+                        <SubjectList
+                            onAddSubject={addSubject}
                         />
 
                         <StudentSearch

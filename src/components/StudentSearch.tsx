@@ -1,5 +1,6 @@
-import React from 'react';
-import { Search, UserPlus, PencilIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, UserPlus, PencilIcon, Trash2, Eye, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Student } from '../types';
 import {AVAILABLE_SUBJECTS} from "../types/subjects.ts";
 
@@ -22,6 +23,14 @@ export default function StudentSearch({
                                           onAddStudent,
                                           onEditStudent,
                                       }: StudentSearchProps) {
+    const navigate = useNavigate();
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
+    const handleDelete = (studentId: string) => {
+        // Here you would implement the actual delete logic
+        console.log('Deleting student:', studentId);
+        setShowDeleteConfirm(null);
+    };
     return (
         <div className="bg-white rounded-xl shadow-lg p-8">
         <div className="flex items-center justify-between mb-6">
@@ -117,39 +126,84 @@ export default function StudentSearch({
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
         {filteredStudents.map((student) => (
-                <tr key={student.id} className="hover:bg-gray-50">
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {student.firstName}
+            <tr key={student.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {student.firstName}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {student.lastName}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            {student.subjects.join(", ")}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            <button
-                onClick={() => onEditStudent(student)}
-        className="text-indigo-600 hover:text-indigo-900 transition-colors"
-        title="Editar alumno"
-        >
-        <PencilIcon className="w-5 h-5" />
-            </button>
-            </td>
+                    {student.lastName}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {student.subjects.join(", ")}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex space-x-3">
+                        <button
+                            onClick={() => navigate(`/student/${student.id}`)}
+                            className="text-blue-600 hover:text-blue-900 transition-colors"
+                            title="Ver estadísticas"
+                        >
+                            <Eye className="w-5 h-5"/>
+                        </button>
+                        <button
+                            onClick={() => onEditStudent(student)}
+                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                            title="Editar alumno"
+                        >
+                            <PencilIcon className="w-5 h-5"/>
+                        </button>
+                        <button
+                            onClick={() => setShowDeleteConfirm(student.id)}
+                            className="text-red-600 hover:text-red-900 transition-colors"
+                            title="Eliminar alumno"
+                        >
+                            <Trash2 className="w-5 h-5"/>
+                        </button>
+                    </div>
+                </td>
             </tr>
-    ))}
+        ))}
         </tbody>
-        </table>
+                    </table>
+                </div>
+            ) : (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                    <Search className="mx-auto h-12 w-12 text-gray-400"/>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No se encontraron alumnos</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Prueba con diferentes términos de búsqueda o añade un nuevo alumno.
+                    </p>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg max-w-md w-full p-6">
+                        <div className="flex items-center mb-4">
+                            <AlertCircle className="w-6 h-6 text-red-600 mr-2" />
+                            <h3 className="text-lg font-medium text-gray-900">Confirmar eliminación</h3>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-4">
+                            ¿Estás seguro de que deseas eliminar este alumno? Esta acción no se puede deshacer y se perderán todos los datos asociados, incluyendo su historial académico y registros de actividad.
+                        </p>
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                onClick={() => setShowDeleteConfirm(null)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-500"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={() => handleDelete(showDeleteConfirm)}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                            >
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-    ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-        <Search className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No se encontraron alumnos</h3>
-    <p className="mt-1 text-sm text-gray-500">
-        Prueba con diferentes términos de búsqueda o añade un nuevo alumno.
-    </p>
-    </div>
-    )}
-    </div>
-);
+    );
 }
