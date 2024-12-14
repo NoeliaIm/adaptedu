@@ -1,7 +1,5 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, BarChart, Activity, BookOpen,  ArrowLeft } from 'lucide-react';
-import { Student } from '../types';
 import { mockStudents } from '../mockData';
 import { AVAILABLE_SUBJECTS } from '../types/subjects';
 
@@ -125,13 +123,13 @@ export default function StudentAnalytics() {
                                         Asignatura
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        1ª Evaluación
+                                        2021-22
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        2ª Evaluación
+                                        2022-23
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        3ª Evaluación
+                                        2023-24
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Evolución

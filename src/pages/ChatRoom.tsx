@@ -37,17 +37,47 @@ function ChatRoom() {
         if (fileInputRef.current) fileInputRef.current.value = '';
         setIsLoading(true);
 
-        // Simulate bot response
-        setTimeout(() => {
+        try {
+
+            const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJpZ2xlc2lhc20ubm9lbGlhQGdtYWlsLmNvbSIsImlkX3BlcnNvbmEiOjUsIm5vbWJyZSI6Ik5vZWxpYSIsImFwZWxsaWRvIjoiSWdsZXNpYXMiLCJyb2xlcyI6WyJBZG1pbmlzdHJhZG9yIl0sImlhdCI6MTczNDE4MDEzOSwiZXhwIjoxNzM0Nzg0OTM5fQ.SlOPx-ud_lPAEO0CUTnMCpcaKJDj5AHmx5JgyVXWXGR2VPbvcehrxYPUEkWAcmLnsv4T-5twRiAHgv0sw4X2ULSkzOtDcgqjCMp9mMiuzov7QmCsEUgUk_q0Oeg7DSxOHB3Nl4eO7yQYiIQdlI6N_feG7pu9RN39XA6iOXb7lutB8xSxzW_KFVk2FKqy_2GMUkBCN-TiJe8Mi8x_A9R9l9EksDsllkr-Z6SFY8ysB9jX_4b7QUoKxmH_bK_GLBKNL2zGqccFSiFg0TaG2x5i8uMNlMBRLPpRS5l7HB3j0gqPPHEme03xi1w-K1DkhRDm27LdqMwu4f4joHuv-UDtTA"
+            // Llamada al backend
+            const response = await fetch('http://localhost:8080/api/edu-assistant/example', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    message: input,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la comunicación con el servidor');
+            }
+
+            const data = await response.json();
+
+            // Manejar la respuesta del bot
             const botMessage: Message = {
                 id: crypto.randomUUID(),
-                text: "I'm a bot assistant. How can I help you today?",
+                text: data.message.text || 'No se recibió una respuesta del servidor',
                 sender: 'bot',
-                timestamp: new Date()
+                timestamp: new Date(),
             };
             setMessages(prev => [...prev, botMessage]);
+        } catch (error) {
+            console.error('Error al enviar el mensaje:', error);
+            const errorMessage: Message = {
+                id: crypto.randomUUID(),
+                text: 'Hubo un error al procesar tu mensaje.',
+                sender: 'bot',
+                timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {

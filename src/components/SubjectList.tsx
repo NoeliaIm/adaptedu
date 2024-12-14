@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { PlusCircle, Pencil, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Subject } from '../types';
 import { AVAILABLE_SUBJECTS } from '../types/subjects';
+import {AVAILABLE_COURSES} from "../types";
 
 export default function SubjectList() {
     const navigate = useNavigate();
     const [filters, setFilters] = useState({
         name: '',
-        description: ''
+        description: '',
+        course: ''
     });
 
-    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFilters(prev => ({
             ...prev,
@@ -22,7 +23,8 @@ export default function SubjectList() {
     const filteredSubjects = AVAILABLE_SUBJECTS.filter(subject => {
         const nameMatch = subject.name.toLowerCase().includes(filters.name.toLowerCase());
         const descriptionMatch = subject.description.toLowerCase().includes(filters.description.toLowerCase());
-        return nameMatch && descriptionMatch;
+        const courseMatch = subject.course.toString() === filters.course || filters.course === '';
+        return nameMatch && descriptionMatch && courseMatch;
     });
 
     return (
@@ -74,6 +76,29 @@ export default function SubjectList() {
                         />
                     </div>
                 </div>
+
+                <div>
+                    <label htmlFor="searchSubject" className="block text-sm font-medium text-gray-700">
+                        Asignatura
+                    </label>
+                    <div className="mt-1 relative rounded-md shadow-sm">
+                        <select
+                            name="subject"
+                            id="searchSubject"
+                            value={filters.course.toString()}
+                            onChange={handleFilterChange}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm
+                border p-2 transition duration-150 ease-in-out"
+                        >
+                            <option value="">Todos los cursos</option>
+                            {AVAILABLE_COURSES.map((course) => (
+                                <option key={course.id} value={course.id}>
+                                    {course.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {filteredSubjects.length > 0 ? (
@@ -82,7 +107,10 @@ export default function SubjectList() {
                         <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                ID
+                                ACRON
+                            </th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                                CURSO
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nombre
@@ -100,6 +128,9 @@ export default function SubjectList() {
                             <tr key={subject.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {subject.id}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {AVAILABLE_COURSES.find(course => course.id === subject.course)?.name}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {subject.name}
