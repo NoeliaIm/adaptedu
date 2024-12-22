@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, BarChart, Activity, BookOpen,  ArrowLeft } from 'lucide-react';
 import { mockStudents } from '../mockData';
-import { AVAILABLE_SUBJECTS } from '../types/subjects';
+import { useSubjects } from "../hooks/useSubjects.ts";
 
 // Mock data for analytics
 const mockAnalytics = {
@@ -13,16 +13,64 @@ const mockAnalytics = {
         { month: 'Mayo', visits: 89 },
     ],
     subjectUsage: [
-        { subject: 'MAT', queries: 156 },
-        { subject: 'LEN', queries: 89 },
-        { subject: 'ING', queries: 134 },
-        { subject: 'FIS', queries: 45 },
+        { subject: {
+                idAsignatura: 1,
+                nombreAsignatura: 'Matemáticas',
+                nombreCurso: '1º ESO',
+                descripcion: 'Matemáticas generales y cálculo',
+                acron: 'MAT'
+            }, queries: 156 },
+        { subject: {
+                idAsignatura: 2,
+                nombreAsignatura: 'Lengua',
+                nombreCurso: '1º ESO',
+                descripcion: 'Lengua castellana y literatura',
+                acron: 'LEN'
+            }, queries: 89 },
+        { subject: {
+                idAsignatura: 3,
+                nombreAsignatura: 'Inglés',
+                nombreCurso: '1º ESO',
+                descripcion: 'Inglés como lengua extranjera',
+                acron: 'ING'
+            }, queries: 134 },
+        { subject: {
+                idAsignatura: 4,
+                nombreAsignatura: 'Historia',
+                nombreCurso: '1º ESO',
+                descripcion: 'Historia universal y de España',
+                acron: 'HIS'
+            }, queries: 45 },
     ],
     grades: [
-        { subject: 'MAT', ev1: 7.5, ev2: 8.0, ev3: 8.5 },
-        { subject: 'LEN', ev1: 6.5, ev2: 7.0, ev3: 7.5 },
-        { subject: 'ING', ev1: 8.0, ev2: 8.5, ev3: 9.0 },
-        { subject: 'FIS', ev1: 7.0, ev2: 7.5, ev3: 8.0 },
+        { subject: {
+                idAsignatura: 1,
+                nombreAsignatura: 'Matemáticas',
+                nombreCurso: '1º ESO',
+                descripcion: 'Matemáticas generales y cálculo',
+                acron: 'MAT'
+            }, ev1: 7.5, ev2: 8.0, ev3: 8.5 },
+        { subject: {
+                idAsignatura: 2,
+                nombreAsignatura: 'Lengua',
+                nombreCurso: '1º ESO',
+                descripcion: 'Lengua castellana y literatura',
+                acron: 'LEN'
+            }, ev1: 6.5, ev2: 7.0, ev3: 7.5 },
+        { subject: {
+                idAsignatura: 3,
+                nombreAsignatura: 'Inglés',
+                nombreCurso: '1º ESO',
+                descripcion: 'Inglés como lengua extranjera',
+                acron: 'ING'
+            }, ev1: 8.0, ev2: 8.5, ev3: 9.0 },
+        { subject: {
+                idAsignatura: 4,
+                nombreAsignatura: 'Historia',
+                nombreCurso: '1º ESO',
+                descripcion: 'Historia universal y de España',
+                acron: 'HIS'
+            }, ev1: 7.0, ev2: 7.5, ev3: 8.0 },
     ]
 };
 
@@ -30,6 +78,7 @@ export default function StudentAnalytics() {
     const { id } = useParams();
     const navigate = useNavigate();
     const student = mockStudents.find(s => s.id === id);
+    const { subjects, loading, error } = useSubjects();
 
     if (!student) {
         return (
@@ -41,6 +90,20 @@ export default function StudentAnalytics() {
             </div>
         );
     }
+
+    const getAvailableSubjects = () => {
+        return subjects;
+    };
+
+    if (loading) {
+        return <p>Cargando asignaturas...</p>;
+    }
+
+    if (error) {
+        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    }
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -89,10 +152,10 @@ export default function StudentAnalytics() {
                         </div>
                         <div className="h-64">
                             {mockAnalytics.subjectUsage.map(({subject, queries}) => (
-                                <div key={subject} className="mb-4">
+                                <div key={subject.idAsignatura} className="mb-4">
                                     <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-medium text-gray-600">
-                      {AVAILABLE_SUBJECTS.find(s => s.id === subject)?.name}
+                      {getAvailableSubjects().find(s => s.idAsignatura === subject.idAsignatura)?.nombreAsignatura}
                     </span>
                                         <span className="text-sm text-gray-500">{queries} consultas</span>
                                     </div>
@@ -138,9 +201,9 @@ export default function StudentAnalytics() {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                 {mockAnalytics.grades.map((grade) => (
-                                    <tr key={grade.subject}>
+                                    <tr key={grade.subject.idAsignatura}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {AVAILABLE_SUBJECTS.find(s => s.id === grade.subject)?.name}
+                                            {getAvailableSubjects().find(s => s.idAsignatura === grade.subject.idAsignatura)?.nombreAsignatura}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {grade.ev1}
