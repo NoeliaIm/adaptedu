@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Plus, Minus } from 'lucide-react';
-import type { Student, LanguageLevel, AcademicLevel } from '../types';
-import { AVAILABLE_SUBJECTS } from '../types/subjects';
+import type {Student, LanguageLevel, AcademicLevel, Subject} from '../types';
+import { useSubjects } from "../hooks/useSubjects.ts";
 
 const LANGUAGE_LEVELS: LanguageLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const ACADEMIC_LEVELS: AcademicLevel[] = ['Bajo', 'Medio-Bajo', 'Medio', 'Medio-Alto', 'Alto'];
@@ -9,7 +9,7 @@ const ACADEMIC_LEVELS: AcademicLevel[] = ['Bajo', 'Medio-Bajo', 'Medio', 'Medio-
 interface StudentFormProps {
     onSubmit: (student: Omit<Student, 'id'>) => void;
     onCancel: () => void;
-    availableSubjects: string[];
+    availableSubjects: Subject[];
     initialData?: Student;
 }
 
@@ -42,6 +42,13 @@ export default function StudentForm({
                                         initialData,
                                     }: StudentFormProps) {
     const [formData, setFormData] = useState<Omit<Student, 'id'>>(defaultFormData);
+    const { subjects, loading, error } = useSubjects();
+
+    const availableSubjects = () => {
+        return subjects.filter(
+            (subject) => !formData.subjects.some((s) => s.idAsignatura === subject.idAsignatura)
+        );
+    };
 
     // Cargar datos iniciales cuando se edita un estudiante existente
     useEffect(() => {
@@ -50,6 +57,14 @@ export default function StudentForm({
             setFormData(studentData);
         }
     }, [initialData]);
+
+    if (loading) {
+        return <p>Cargando asignaturas...</p>;
+    }
+
+    if (error) {
+        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target as HTMLInputElement;
@@ -62,36 +77,33 @@ export default function StudentForm({
     };
 
     const handleSubjectAdd = () => {
-        const availableSubjects = AVAILABLE_SUBJECTS.filter(
-            (subject) => !formData.subjects.includes(subject.id)
-        );
-        if (availableSubjects.length > 0) {
+        const availableSubjectsList = availableSubjects();
+        if (availableSubjectsList.length > 0) {
             setFormData((prev) => ({
                 ...prev,
-                subjects: [...prev.subjects, availableSubjects[0].id],
+                subjects: [...prev.subjects, availableSubjectsList[0]],
             }));
         }
     };
 
-    const handleSubjectChange = (index: number, subjectId: string) => {
+    const handleSubjectChange = (id: number | undefined, newSubject: Subject) => {
         setFormData((prev) => ({
             ...prev,
-            subjects: prev.subjects.map((s, i) => (i === index ? subjectId : s)),
+            subjects: prev.subjects.map((subject) =>
+                subject.idAsignatura === id ? newSubject : subject
+            ),
+        }));
+    };
+    const removeSubject = (id: number | undefined) => {
+        setFormData((prev) => ({
+            ...prev,
+            subjects: prev.subjects.filter((subject) => subject.idAsignatura !== id),
         }));
     };
 
-    const removeSubject = (index: number) => {
-        setFormData((prev) => ({
-            ...prev,
-            subjects: prev.subjects.filter((_, i) => i !== index),
-        }));
-    };
-
-    const getAvailableSubjects = (currentSubjectId?: string) => {
-        return AVAILABLE_SUBJECTS.filter(
-            (subject) =>
-                subject.id === currentSubjectId ||
-                !formData.subjects.includes(subject.id)
+    const getAvailableSubjects = () => {
+        return subjects.filter(
+            (subject) => !formData.subjects.some((s) => s.idAsignatura === subject.idAsignatura)
         );
     };
 
@@ -199,22 +211,29 @@ export default function StudentForm({
                         </button>
                     </div>
                     <div className="space-y-3">
-                        {formData.subjects.map((subjectId, index) => (
-                            <div key={index} className="flex gap-4 items-center">
+                        {formData.subjects.map((subject) => (
+                            <div key={subject.idAsignatura} className="flex gap-4 items-center">
                                 <select
-                                    value={subjectId}
-                                    onChange={(e) => handleSubjectChange(index, e.target.value)}
-                                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
+                                    value={subject.idAsignatura}
+                                    onChange={(e) => {
+                                        const selectedSubject = subjects.find(s => s.idAsignatura === parseInt(e.target.value));
+                                        if (selectedSubject) {
+                                            handleSubjectChange(subject.idAsignatura, selectedSubject);
+                                        }
+                                    }}
+                                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm
+                  border p-2 transition duration-150 ease-in-out"
                                 >
-                                    {getAvailableSubjects(subjectId).map((subject) => (
-                                        <option key={subject.id} value={subject.id}>
-                                            {subject.name} - {subject.description}
+                                    <option value={subject.idAsignatura}>{subject.nombreAsignatura} - {subject.descripcion}</option>
+                                    {getAvailableSubjects().map((availableSubject) => (
+                                        <option key={availableSubject.idAsignatura} value={availableSubject.idAsignatura}>
+                                            {availableSubject.nombreAsignatura} - {availableSubject.descripcion}
                                         </option>
                                     ))}
                                 </select>
                                 <button
                                     type="button"
-                                    onClick={() => removeSubject(index)}
+                                    onClick={() => subject.idAsignatura !== undefined && removeSubject(subject.idAsignatura)}
                                     className="p-2 text-gray-400 hover:text-red-500"
                                 >
                                     <Minus className="w-5 h-5"/>

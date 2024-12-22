@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { PlusCircle, Pencil, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AVAILABLE_SUBJECTS } from '../types/subjects';
 import {AVAILABLE_COURSES} from "../types";
+import { useSubjects } from "../hooks/useSubjects.ts";
 
 export default function SubjectList() {
     const navigate = useNavigate();
@@ -12,6 +12,18 @@ export default function SubjectList() {
         course: ''
     });
 
+    const { subjects, loading, error } = useSubjects();
+
+
+    if (loading) {
+        return <p>Cargando asignaturas...</p>;
+    }
+
+    if (error) {
+        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    }
+
+
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFilters(prev => ({
@@ -20,10 +32,10 @@ export default function SubjectList() {
         }));
     };
 
-    const filteredSubjects = AVAILABLE_SUBJECTS.filter(subject => {
-        const nameMatch = subject.name.toLowerCase().includes(filters.name.toLowerCase());
-        const descriptionMatch = subject.description.toLowerCase().includes(filters.description.toLowerCase());
-        const courseMatch = subject.course.toString() === filters.course || filters.course === '';
+    const filteredSubjects = subjects.filter(subject => {
+        const nameMatch = subject.nombreAsignatura.toLowerCase().includes(filters.name.toLowerCase());
+        const descriptionMatch = subject.descripcion.toLowerCase().includes(filters.description.toLowerCase());
+        const courseMatch = subject.nombreCurso === filters.course || filters.course === '';
         return nameMatch && descriptionMatch && courseMatch;
     });
 
@@ -79,7 +91,7 @@ export default function SubjectList() {
 
                 <div>
                     <label htmlFor="searchSubject" className="block text-sm font-medium text-gray-700">
-                        Asignatura
+                        Curso
                     </label>
                     <div className="mt-1 relative rounded-md shadow-sm">
                         <select
@@ -125,22 +137,26 @@ export default function SubjectList() {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                         {filteredSubjects.map((subject) => (
-                            <tr key={subject.id} className="hover:bg-gray-50">
+                            <tr key={subject.acron} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {subject.id}
+                                    {subject.acron}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {AVAILABLE_COURSES.find(course => course.id === subject.course)?.name}
+                                    {[...new Set(subjects.map(subject => subject.nombreCurso))].map(course => (
+                                        <option key={course} value={course}>
+                                            {course}
+                                        </option>
+                                    ))}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {subject.name}
+                                    {subject.nombreAsignatura}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500">
-                                    {subject.description}
+                                    {subject.descripcion}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <button
-                                        onClick={() => navigate(`/subject/${subject.id}`)}
+                                        onClick={() => navigate(`/subject/${subject.idAsignatura}`)}
                                         className="text-indigo-600 hover:text-indigo-900 transition-colors"
                                         title="Editar asignatura"
                                     >

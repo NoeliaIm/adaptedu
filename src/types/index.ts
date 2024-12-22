@@ -1,8 +1,9 @@
 export interface Subject {
-    id: string;
-    name: string;
-    description: string;
-    course: string;
+    idAsignatura?: number;
+    nombreAsignatura: string;
+    descripcion: string;
+    nombreCurso: string;
+    acron: string;
 }
 
 export interface TeacherForm {
@@ -16,7 +17,7 @@ export interface Student {
     firstName: string;
     lastName: string;
     recordNumber: string;
-    subjects: string[];
+    subjects: Subject[];
     isInternational: boolean;
     nationality?: string;
     nativeLanguage: string;

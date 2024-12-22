@@ -5,13 +5,15 @@ import StudentForm from '../components/StudentForm';
 import SubjectList from '../components/SubjectList';
 import {Student, Subject, TeacherForm as TeacherFormType} from '../types';
 import {mockStudents} from '../mockData';
-import {AVAILABLE_SUBJECTS} from '../types/subjects';
+import { useSubjects } from "../hooks/useSubjects.ts";
+
 
 function Home() {
+    const { subjects, loading, error } = useSubjects();
     const [formData, setFormData] = useState<TeacherFormType>({
         firstName: '',
         lastName: '',
-        subjects: [{...AVAILABLE_SUBJECTS[0]}],
+        subjects:  subjects.length > 0 ? [{ ...subjects[0] }] : [],
     });
 
     const [submitted, setSubmitted] = useState(false);
@@ -20,9 +22,18 @@ function Home() {
         lastName: '',
         subject: '',
     });
+
     const [showStudentForm, setShowStudentForm] = useState(false);
     const [students, setStudents] = useState<Student[]>(mockStudents);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+
+    if (loading) {
+        return <p>Cargando asignaturas...</p>;
+    }
+
+    if (error) {
+        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
@@ -32,18 +43,19 @@ function Home() {
         }));
     };
 
-    const handleSubjectChange = (id: string, newSubject: Subject) => {
+    const handleSubjectChange = (id: number | undefined, newSubject: Subject) => {
+        if (id === undefined) return; // Add a guard against undefined
         setFormData((prev) => ({
             ...prev,
             subjects: prev.subjects.map((subject) =>
-                subject.id === id ? newSubject : subject
+                subject.idAsignatura === id ? newSubject : subject
             ),
         }));
     };
 
     const addSubject = () => {
-        const availableSubjects = AVAILABLE_SUBJECTS.filter(
-            (subject) => !formData.subjects.some((s) => s.id === subject.id)
+        const availableSubjects = subjects.filter(
+            (subject) => !formData.subjects.some((s) => s.idAsignatura === subject.idAsignatura)
         );
         if (availableSubjects.length > 0) {
             setFormData((prev) => ({
@@ -53,10 +65,10 @@ function Home() {
         }
     };
 
-    const removeSubject = (id: string) => {
+    const removeSubject = (id: number) => {
         setFormData((prev) => ({
             ...prev,
-            subjects: prev.subjects.filter((subject) => subject.id !== id),
+            subjects: prev.subjects.filter((subject) => subject.idAsignatura !== id),
         }));
     };
 
@@ -64,7 +76,7 @@ function Home() {
         return (
             formData.firstName.trim() !== '' &&
             formData.lastName.trim() !== '' &&
-            formData.subjects.every((subject) => subject.name.trim() !== '')
+            formData.subjects.every((subject) => subject.nombreAsignatura.trim() !== '')
         );
     };
 
@@ -92,14 +104,14 @@ function Home() {
         const lastNameMatch = student.lastName
             .toLowerCase()
             .includes(filters.lastName.toLowerCase());
-        const subjectMatch = student.subjects.some((subject) =>
-            subject.toLowerCase().includes(filters.subject.toLowerCase())
+        const subjectMatch = filters.subject === '' || student.subjects.some(
+            (subject) => subject.idAsignatura === parseInt(filters.subject)
         );
 
         return (
             (filters.name === '' || nameMatch) &&
             (filters.lastName === '' || lastNameMatch) &&
-            (filters.subject === '' || subjectMatch)
+            subjectMatch
         );
     });
 
@@ -143,7 +155,7 @@ function Home() {
                             setShowStudentForm(false);
                             setSelectedStudent(null);
                         }}
-                        availableSubjects={formData.subjects.map((s) => s.name)}
+                        availableSubjects={formData.subjects}
                         initialData={selectedStudent || undefined}
                     />
                 ) : (
@@ -160,7 +172,7 @@ function Home() {
                         />
 
                         <SubjectList
-                            onAddSubject={addSubject}
+                           // onAddSubject={addSubject}
                         />
 
                         <StudentSearch

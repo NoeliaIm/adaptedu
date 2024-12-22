@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Search, UserPlus, PencilIcon, Trash2, Eye, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Student } from '../types';
-import {AVAILABLE_SUBJECTS} from "../types/subjects.ts";
+import {Student} from '../types';
+import { useSubjects } from "../hooks/useSubjects.ts";
 
 interface StudentSearchProps {
     filters: {
@@ -25,12 +25,25 @@ export default function StudentSearch({
                                       }: StudentSearchProps) {
     const navigate = useNavigate();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+    const { subjects, loading, error } = useSubjects();
+
+    const getAvailableSubjects = () => {
+        return subjects;
+    };
 
     const handleDelete = (studentId: string) => {
         // Here you would implement the actual delete logic
         console.log('Deleting student:', studentId);
         setShowDeleteConfirm(null);
     };
+
+    if (loading) {
+        return <p>Cargando asignaturas...</p>;
+    }
+
+    if (error) {
+        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    }
     return (
         <div className="bg-white rounded-xl shadow-lg p-8">
         <div className="flex items-center justify-between mb-6">
@@ -95,9 +108,9 @@ export default function StudentSearch({
                 border p-2 transition duration-150 ease-in-out"
             >
                 <option value="">Todas las asignaturas</option>
-                {AVAILABLE_SUBJECTS.map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                        {subject.name} - {subject.description}
+                {getAvailableSubjects().map((availableSubject) => (
+                    <option key={availableSubject.idAsignatura} value={availableSubject.idAsignatura}>
+                        {availableSubject.nombreAsignatura} - {availableSubject.descripcion}
                     </option>
                 ))}
             </select>
@@ -134,7 +147,7 @@ export default function StudentSearch({
                     {student.lastName}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {student.subjects.join(", ")}
+                    {student.subjects.map(subject => subject.acron).join(", ")}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-3">

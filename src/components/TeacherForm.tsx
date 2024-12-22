@@ -1,14 +1,14 @@
 import React, {useState} from 'react';
 import { PlusCircle, MinusCircle, GraduationCap, Save, X } from 'lucide-react';
 import { TeacherForm, Subject } from '../types';
-import { AVAILABLE_SUBJECTS } from '../types/subjects';
+import {useSubjects} from "../hooks/useSubjects.ts";
 
 interface TeacherFormProps {
     formData: TeacherForm;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onSubjectChange: (id: string, subject: Subject) => void;
+    onSubjectChange: (id: number | undefined, subject: Subject) => void;
     onAddSubject: () => void;
-    onRemoveSubject: (id: string) => void;
+    onRemoveSubject: (id: number) => void;
     onSubmit: (e: React.FormEvent) => void;
     isFormValid: () => boolean;
     submitted: boolean;
@@ -25,12 +25,21 @@ export default function TeacherFormComponent({
                                                  submitted,
                                              }: TeacherFormProps) {
     const [showSummary, setShowSummary] = useState(true);
+    const { subjects, loading, error } = useSubjects();
 
     const getAvailableSubjects = () => {
-        return AVAILABLE_SUBJECTS.filter(
-            (subject) => !formData.subjects.some((s) => s.id === subject.id)
+        return subjects.filter(
+            (subject) => !formData.subjects.some((s) => s.idAsignatura === subject.idAsignatura)
         );
     };
+
+    if (loading) {
+        return <p>Cargando asignaturas...</p>;
+    }
+
+    if (error) {
+        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    }
     return (
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
             <div className="flex items-center gap-3 mb-8">
@@ -90,29 +99,29 @@ export default function TeacherFormComponent({
                     </div>
 
                     {formData.subjects.map((subject) => (
-                        <div key={subject.id} className="flex items-center gap-2">
+                        <div key={subject.idAsignatura} className="flex items-center gap-2">
                             <select
-                                value={subject.id}
+                                value={subject.idAsignatura}
                                 onChange={(e) => {
-                                    const selectedSubject = AVAILABLE_SUBJECTS.find(s => s.id === e.target.value);
+                                    const selectedSubject = subjects.find(s => s.idAsignatura === parseInt(e.target.value));
                                     if (selectedSubject) {
-                                        onSubjectChange(subject.id, selectedSubject);
+                                        onSubjectChange(subject.idAsignatura, selectedSubject);
                                     }
                                 }}
                                 className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm
                   border p-2 transition duration-150 ease-in-out"
                                 required
                             >
-                                <option value={subject.id}>{subject.name} - {subject.description}</option>
+                                <option value={subject.idAsignatura}>{subject.nombreAsignatura} - {subject.descripcion}</option>
                                 {getAvailableSubjects().map((availableSubject) => (
-                                    <option key={availableSubject.id} value={availableSubject.id}>
-                                        {availableSubject.name} - {availableSubject.description}
+                                    <option key={availableSubject.idAsignatura} value={availableSubject.idAsignatura}>
+                                        {availableSubject.nombreAsignatura} - {availableSubject.descripcion}
                                     </option>
                                 ))}
                             </select>
                             <button
                                 type="button"
-                                onClick={() => onRemoveSubject(subject.id)}
+                                onClick={() => subject.idAsignatura !== undefined && onRemoveSubject(subject.idAsignatura)}
                                 className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                                 disabled={formData.subjects.length === 1}
                             >
@@ -148,7 +157,7 @@ export default function TeacherFormComponent({
                     <p><strong>Asignaturas:</strong></p>
                     <ul className="list-disc list-inside ml-4">
                         {formData.subjects.map((subject) => (
-                            <li key={subject.id}>{subject.name} - {subject.description}</li>
+                            <li key={subject.idAsignatura}>{subject.nombreAsignatura} - {subject.descripcion}</li>
                         ))}
                     </ul>
                 </div>

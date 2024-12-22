@@ -6,7 +6,21 @@ export const mockStudents: Student[] = [
         firstName: 'Juan',
         lastName: 'García',
         recordNumber: '2024001',
-        subjects: ['GEO', 'BIO', 'MAT'],
+        subjects: [{
+            idAsignatura: 1,
+            nombreAsignatura: 'Matemáticas',
+            nombreCurso: '1º ESO',
+            descripcion: 'Matemáticas generales y cálculo',
+            acron: 'MAT'
+        },
+            {
+                idAsignatura: 3,
+                nombreAsignatura: 'Inglés',
+                nombreCurso: '1º ESO',
+                descripcion: 'Inglés como lengua extranjera',
+                acron: 'ING'
+            }
+        ],
         isInternational: false,
         nationality: 'España',
         nativeLanguage: 'Español',
@@ -31,7 +45,35 @@ export const mockStudents: Student[] = [
         firstName: 'María',
         lastName: 'López',
         recordNumber: '2024002',
-        subjects: ['HIS', 'LEN', 'ING'],
+        subjects:  [{
+            idAsignatura: 1,
+            nombreAsignatura: 'Matemáticas',
+            nombreCurso: '1º ESO',
+            descripcion: 'Matemáticas generales y cálculo',
+            acron: 'MAT'
+        },
+            {
+                idAsignatura: 3,
+                nombreAsignatura: 'Inglés',
+                nombreCurso: '1º ESO',
+                descripcion: 'Inglés como lengua extranjera',
+                acron: 'ING'
+            },
+            {
+                idAsignatura: 4,
+                nombreAsignatura: 'Historia',
+                nombreCurso: '1º ESO',
+                descripcion: 'Historia universal y de España',
+                acron: 'HIS'
+            },
+            {
+                idAsignatura: 2,
+                nombreAsignatura: 'Lengua',
+                nombreCurso: '1º ESO',
+                descripcion: 'Lengua castellana y literatura',
+                acron: 'LEN'
+            }
+        ],
         isInternational: true,
         nationality: 'Francia',
         nativeLanguage: 'Francés',
