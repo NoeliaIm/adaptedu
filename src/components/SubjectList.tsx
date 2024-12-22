@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { PlusCircle, Pencil, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import {AVAILABLE_COURSES} from "../types";
 import { useSubjects } from "../hooks/useSubjects.ts";
+import {useCourses} from "../hooks/useCourses.ts";
 
 export default function SubjectList() {
     const navigate = useNavigate();
@@ -13,6 +13,11 @@ export default function SubjectList() {
     });
 
     const { subjects, loading, error } = useSubjects();
+    const { courses } = useCourses();
+
+    const getAvailableCourses = () => {
+        return courses;
+    }
 
 
     if (loading) {
@@ -90,22 +95,22 @@ export default function SubjectList() {
                 </div>
 
                 <div>
-                    <label htmlFor="searchSubject" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="searchCourse" className="block text-sm font-medium text-gray-700">
                         Curso
                     </label>
                     <div className="mt-1 relative rounded-md shadow-sm">
                         <select
-                            name="subject"
-                            id="searchSubject"
-                            value={filters.course.toString()}
+                            name="course"
+                            id="searchCourse"
+                            value={filters.course}
                             onChange={handleFilterChange}
                             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm
                 border p-2 transition duration-150 ease-in-out"
                         >
                             <option value="">Todos los cursos</option>
-                            {AVAILABLE_COURSES.map((course) => (
-                                <option key={course.id} value={course.id}>
-                                    {course.name}
+                            {getAvailableCourses().map((course) => (
+                                <option key={course.nombreCurso} value={course.nombreCurso}>
+                                    {course.nombreCurso}
                                 </option>
                             ))}
                         </select>
@@ -142,11 +147,7 @@ export default function SubjectList() {
                                     {subject.acron}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {[...new Set(subjects.map(subject => subject.nombreCurso))].map(course => (
-                                        <option key={course} value={course}>
-                                            {course}
-                                        </option>
-                                    ))}
+                                    {subject.nombreCurso}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {subject.nombreAsignatura}

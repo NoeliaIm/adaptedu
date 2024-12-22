@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Save, Plus, Minus } from 'lucide-react';
 import type {Student, LanguageLevel, AcademicLevel, Subject} from '../types';
 import { useSubjects } from "../hooks/useSubjects.ts";
+import { useNivelAmbitoAcademico } from "../hooks/useAcademicLevels.ts"; // Importamos el nuevo hook
+import { NivelAmbitoAcademico } from "../types"; // Importamos el tipo adecuado
 
 const LANGUAGE_LEVELS: LanguageLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-const ACADEMIC_LEVELS: AcademicLevel[] = ['Bajo', 'Medio-Bajo', 'Medio', 'Medio-Alto', 'Alto'];
 
 interface StudentFormProps {
     onSubmit: (student: Omit<Student, 'id'>) => void;
@@ -24,10 +25,10 @@ const defaultFormData: Omit<Student, 'id'> = {
     languageLevels: [],
     hasASD: false,
     academicLevels: {
-        mathematics: 'Medio',
-        literature: 'Medio',
-        english: 'Medio',
-        history: 'Medio',
+        mathematics: {idNivelAcademico: 3, nombreNivelAcademico: 'Medio'},
+        literature: {idNivelAcademico: 3, nombreNivelAcademico: 'Medio'},
+        english: {idNivelAcademico: 3, nombreNivelAcademico: 'Medio'},
+        history: {idNivelAcademico: 3, nombreNivelAcademico: 'Medio'},
     },
     specialNeeds: {
         adhd: false,
@@ -42,7 +43,8 @@ export default function StudentForm({
                                         initialData,
                                     }: StudentFormProps) {
     const [formData, setFormData] = useState<Omit<Student, 'id'>>(defaultFormData);
-    const { subjects, loading, error } = useSubjects();
+    const { subjects, loading: subjectsLoading, error: subjectsError } = useSubjects();
+    const { nivelesAcademicos, loading: nivelesLoading, error: nivelesError } = useNivelAmbitoAcademico(); // Usamos el hook para niveles académicos
 
     const availableSubjects = () => {
         return subjects.filter(
@@ -58,12 +60,12 @@ export default function StudentForm({
         }
     }, [initialData]);
 
-    if (loading) {
-        return <p>Cargando asignaturas...</p>;
+    if (subjectsLoading || nivelesLoading) {
+        return <p>Cargando datos...</p>;
     }
 
-    if (error) {
-        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    if (subjectsError || nivelesError) {
+        return <p>Error al cargar los datos. Por favor, inténtalo de nuevo.</p>;
     }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -425,9 +427,9 @@ export default function StudentForm({
                                     }
                                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                                 >
-                                    {ACADEMIC_LEVELS.map((level) => (
-                                        <option key={level} value={level}>
-                                            {level}
+                                    {nivelesAcademicos.map((nivel : NivelAmbitoAcademico) => (
+                                        <option key={nivel.idNivelAcademico} value={nivel.idNivelAcademico}>
+                                            {nivel.nombreNivelAcademico}
                                         </option>
                                     ))}
                                 </select>

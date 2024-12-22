@@ -40,16 +40,32 @@ export interface Student {
 }
 
 export interface Course {
-    id: number;
-    name: string;
+    idCurso: number;
+    nombreCurso: string;
+    annio: string;
+    active: boolean;
 }
 
-export const AVAILABLE_COURSES: Course[] = [
-    { id: 1, name: '1º ESO' },
-    { id: 2, name: '2º ESO' },
-    { id: 3, name: '3º ESO' },
-    { id: 4, name: '4º ESO' }
-];
+export interface AmbitoAcademico {
+    idAmbito: number;
+    nombreAmbito: string;
+    nivelAmbito: NivelAmbitoAcademico;
+}
+
+export interface NivelAmbitoAcademico {
+    idNivelAcademico: number;
+    nombreNivelAcademico: string;
+}
+
+export interface Idioma {
+    idIdioma: number;
+    nombreIdioma: string;
+}
+
+export interface NivelIdioma {
+    idNivel: number;
+    nombreNivel: string;
+}
 
 export type LanguageLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
 export type AcademicLevel = 'Bajo' | 'Medio-Bajo' | 'Medio' | 'Medio-Alto' | 'Alto';

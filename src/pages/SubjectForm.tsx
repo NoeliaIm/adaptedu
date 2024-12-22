@@ -3,12 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Save, ArrowLeft } from 'lucide-react';
 import { Subject } from '../types';
 import { useSubjects } from "../hooks/useSubjects.ts";
-import { AVAILABLE_COURSES } from '../types';
+import { useCourses } from "../hooks/useCourses.ts";
 
 export default function SubjectForm() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { subjects, loading, error } = useSubjects();
+    const { courses } = useCourses();
     const [formData, setFormData] = useState<Omit<Subject, 'id'>>({
         nombreAsignatura: '',
         descripcion: '',
@@ -16,6 +17,9 @@ export default function SubjectForm() {
         acron: '',
     });
 
+    const getAvailableCourses = () => {
+        return courses;
+    };
 
     useEffect(() => {
         if (id && subjects.length > 0) {
@@ -122,9 +126,9 @@ export default function SubjectForm() {
                                 required
                             >
                                 <option value="">Selecciona un curso</option>
-                                {AVAILABLE_COURSES.map((course) => (
-                                    <option key={course.id} value={course.id}>
-                                        {course.name}
+                                {getAvailableCourses().map((course) => (
+                                    <option key={course.idCurso} value={course.idCurso}>
+                                        {course.nombreCurso}
                                     </option>
                                 ))}
                             </select>
