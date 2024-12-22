@@ -2,30 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Save, ArrowLeft } from 'lucide-react';
 import { Subject } from '../types';
-import { AVAILABLE_SUBJECTS } from '../types/subjects';
+import { useSubjects } from "../hooks/useSubjects.ts";
 import { AVAILABLE_COURSES } from '../types';
 
 export default function SubjectForm() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { subjects, loading, error } = useSubjects();
     const [formData, setFormData] = useState<Omit<Subject, 'id'>>({
-        name: '',
-        description: '',
-        course: ''
+        nombreAsignatura: '',
+        descripcion: '',
+        nombreCurso: '',
+        acron: '',
     });
 
+
     useEffect(() => {
-        if (id) {
-            const subject = AVAILABLE_SUBJECTS.find(s => s.id === id);
+        if (id && subjects.length > 0) {
+            const subject = subjects.find(s => s.idAsignatura === Number(id));
             if (subject) {
                 setFormData({
-                    name: subject.name,
-                    description: subject.description,
-                    course: subject.course.toString(),
+                    nombreAsignatura: subject.nombreAsignatura,
+                    descripcion: subject.descripcion,
+                    nombreCurso: subject.nombreCurso.toString(),
+                    acron: subject.acron,
                 });
             }
         }
-    }, [id]);
+    }, [id, subjects]);
+
+    if (loading) {
+        return <p>Cargando asignaturas...</p>;
+    }
+
+    if (error) {
+        return <p>Error al cargar asignaturas: {error.message}</p>;
+    }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -60,7 +72,22 @@ export default function SubjectForm() {
                                 type="text"
                                 id="name"
                                 name="name"
-                                value={formData.name}
+                                value={formData.nombreAsignatura}
+                                onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
+                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                Acrónimo de la asignatura
+                            </label>
+                            <input
+                                type="text"
+                                id="acron"
+                                name="acron"
+                                value={formData.acron}
                                 onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
                                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                                 required
@@ -75,7 +102,7 @@ export default function SubjectForm() {
                                 id="description"
                                 name="description"
                                 rows={4}
-                                value={formData.description}
+                                value={formData.descripcion}
                                 onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
                                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                                 required
@@ -89,7 +116,7 @@ export default function SubjectForm() {
                             <select
                                 id="course"
                                 name="course"
-                                value={formData.course}
+                                value={formData.nombreCurso}
                                 onChange={(e) => setFormData(prev => ({...prev, course: e.target.value}))}
                                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                                 required

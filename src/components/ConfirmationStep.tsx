@@ -1,5 +1,6 @@
 import { CheckCircle2, FileWarning, Upload } from 'lucide-react';
-import { AVAILABLE_SUBJECTS } from '../types/subjects';
+import { useSubjects } from "../hooks/useSubjects.ts";
+import {useEffect, useState} from "react";
 
 interface ConfirmationStepProps {
     uploadProgress: number;
@@ -12,16 +13,25 @@ function ConfirmationStep({
                               uploadStatus,
                               selectedSubject,
                           }: ConfirmationStepProps) {
-    const subject = AVAILABLE_SUBJECTS.find(s => s.id === selectedSubject);
+    const { subjects } = useSubjects();
 
+    const [isSubjectsLoaded, setIsSubjectsLoaded] = useState(false);
+
+    useEffect(() => {
+        if (subjects.length > 0) {
+            setIsSubjectsLoaded(true);
+        }
+    }, [subjects]);
+
+    const subject = isSubjectsLoaded ? subjects.find((subject) => subject.idAsignatura === parseInt(selectedSubject)) : null;
     return (
         <div className="text-center">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
                 {uploadStatus === 'success'
                     ? '¡Archivo subido con éxito!'
-                    : uploadStatus === 'error'
+                    : uploadStatus  === 'error'
                         ? 'Error al subir el archivo'
-                        : `Se subirá el archivo a la carpeta de la asignatura de ${subject?.name}`}
+                        : `Se subirá el archivo a la carpeta de la asignatura de ${subject?.nombreAsignatura}`}
             </h2>
 
             <div className="mb-8">
@@ -49,7 +59,7 @@ function ConfirmationStep({
                             Tu archivo se ha subido correctamente al servidor
                             {subject && (
                                 <span className="block mt-2 font-medium">
-                  Asignatura: {subject.name}
+                  Asignatura: {subject.nombreAsignatura}
                 </span>
                             )}
                         </p>

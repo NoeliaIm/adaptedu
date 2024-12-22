@@ -1,5 +1,5 @@
 import { FileText, Calendar, HardDrive } from 'lucide-react';
-import { AVAILABLE_SUBJECTS } from '../types/subjects';
+import { useSubjects } from "../hooks/useSubjects.ts";
 
 interface ReviewStepProps {
     selectedFile: File | null;
@@ -8,8 +8,21 @@ interface ReviewStepProps {
 }
 
 function ReviewStep({ selectedFile, selectedSubject, onSubjectChange }: ReviewStepProps) {
+    const { subjects, loading, error } = useSubjects();
+
     if (!selectedFile) return null;
 
+    const getAvailableSubjects = () => {
+        return subjects;
+    };
+
+    if (loading) {
+        return <p>Cargando asignaturas...</p>;
+    }
+
+    if (error) {
+        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    }
     return (
         <div>
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -69,9 +82,9 @@ function ReviewStep({ selectedFile, selectedSubject, onSubjectChange }: ReviewSt
                             required
                         >
                             <option value="">Selecciona una asignatura</option>
-                            {AVAILABLE_SUBJECTS.map((subject) => (
-                                <option key={subject.id} value={subject.id}>
-                                    {subject.name} - {subject.description}
+                            {getAvailableSubjects().map((subject) => (
+                                <option key={subject.idAsignatura} value={subject.idAsignatura}>
+                                    {subject.nombreAsignatura}
                                 </option>
                             ))}
                         </select>

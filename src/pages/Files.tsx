@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Search, Trash2, AlertCircle } from 'lucide-react';
-import { AVAILABLE_SUBJECTS } from '../types/subjects';
 import FileUploadStep from '../components/FileUploadStep';
 import ReviewStep from '../components/ReviewStep';
 import ConfirmationStep from '../components/ConfirmationStep';
+import {Subject} from "../types";
+import { useSubjects } from "../hooks/useSubjects.ts";
 
 interface FileRecord {
     id: string;
     name: string;
-    subject: string;
+    subject: Subject;
     uploadDate: Date;
     size: number;
 }
@@ -18,14 +19,26 @@ const mockFiles: FileRecord[] = [
     {
         id: '1',
         name: 'Examen_Matematicas_1T.pdf',
-        subject: 'MAT',
+        subject: {
+            idAsignatura: 1,
+            nombreAsignatura: 'Matemáticas',
+            nombreCurso: '1º ESO',
+            descripcion: 'Matemáticas generales y cálculo',
+            acron: 'MAT'
+        },
         uploadDate: new Date('2024-03-15'),
         size: 1500000,
     },
     {
         id: '2',
         name: 'Trabajo_Literatura.docx',
-        subject: 'LEN',
+        subject: {
+            idAsignatura: 2,
+            nombreAsignatura: 'Lengua',
+            nombreCurso: '1º ESO',
+            descripcion: 'Lengua castellana y literatura',
+            acron: 'LEN'
+        },
         uploadDate: new Date('2024-03-14'),
         size: 2500000,
     },
@@ -41,10 +54,22 @@ function Files() {
     const [files, setFiles] = useState<FileRecord[]>(mockFiles);
     const [filters, setFilters] = useState({ name: '', subject: '' });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+    const { subjects, loading, error } = useSubjects();
 
     const handleFileSelect = (file: File | null) => {
         setSelectedFile(file);
     };
+
+    const getAvailableSubjects = () => {
+        return subjects;
+    };
+
+    if (loading) {
+        return <p>Cargando asignaturas...</p>;
+    }
+    if (error) {
+        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    }
 
     const handleNext = () => {
         if (currentStep === 3) {
@@ -89,7 +114,7 @@ function Files() {
 
     const filteredFiles = files.filter(file => {
         const nameMatch = file.name.toLowerCase().includes(filters.name.toLowerCase());
-        const subjectMatch = !filters.subject || file.subject === filters.subject;
+        const subjectMatch = !filters.subject || file.subject.idAsignatura === parseInt(filters.subject);
         return nameMatch && subjectMatch;
     });
 
@@ -214,9 +239,9 @@ function Files() {
                                     className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 >
                                     <option value="">Todas las asignaturas</option>
-                                    {AVAILABLE_SUBJECTS.map((subject) => (
-                                        <option key={subject.id} value={subject.id}>
-                                            {subject.name}
+                                    {getAvailableSubjects().map((availableSubject) => (
+                                        <option key={availableSubject.idAsignatura} value={availableSubject.idAsignatura}>
+                                            {availableSubject.nombreAsignatura} - {availableSubject.descripcion}
                                         </option>
                                     ))}
                                 </select>
@@ -252,7 +277,7 @@ function Files() {
                                                 {file.name}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {AVAILABLE_SUBJECTS.find(s => s.id === file.subject)?.name}
+                                                {file.subject.nombreAsignatura}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {file.uploadDate.toLocaleDateString()}
