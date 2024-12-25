@@ -8,13 +8,14 @@ import { useCourses } from "../hooks/useCourses.ts";
 export default function SubjectForm() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { subjects, loading, error } = useSubjects();
+    const { subjects, loading, error, createOrUpdateSubject} = useSubjects();
     const { courses } = useCourses();
     const [formData, setFormData] = useState<Omit<Subject, 'id'>>({
         nombreAsignatura: '',
         descripcion: '',
         nombreCurso: '',
         acron: '',
+        idCurso: 0
     });
 
     const getAvailableCourses = () => {
@@ -28,8 +29,10 @@ export default function SubjectForm() {
                 setFormData({
                     nombreAsignatura: subject.nombreAsignatura,
                     descripcion: subject.descripcion,
-                    nombreCurso: subject.nombreCurso.toString(),
+                    nombreCurso: subject.nombreCurso,
                     acron: subject.acron,
+                    idCurso: subject.idCurso,
+                    idAsignatura: subject.idAsignatura
                 });
             }
         }
@@ -43,11 +46,20 @@ export default function SubjectForm() {
         return <p>Error al cargar asignaturas: {error.message}</p>;
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO llamada para guardar la asignatura
-        console.log('Saving subject:', { id, ...formData });
-        navigate('/');
+        try {
+            await createOrUpdateSubject(formData);
+            navigate('/');
+        } catch (err) {
+            console.error('Error saving subject:', err);
+        }
     };
 
     return (
@@ -69,15 +81,15 @@ export default function SubjectForm() {
                 <form onSubmit={handleSubmit} className="bg-white shadow-sm rounded-lg p-6">
                     <div className="space-y-6">
                         <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="nombreAsignatura" className="block text-sm font-medium text-gray-700">
                                 Nombre de la asignatura
                             </label>
                             <input
                                 type="text"
-                                id="name"
-                                name="name"
+                                id="nombreAsignatura"
+                                name="nombreAsignatura"
                                 value={formData.nombreAsignatura}
-                                onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
+                                onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                                 required
                             />
@@ -92,36 +104,36 @@ export default function SubjectForm() {
                                 id="acron"
                                 name="acron"
                                 value={formData.acron}
-                                onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
+                                onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
                                 Descripción
                             </label>
                             <textarea
-                                id="description"
-                                name="description"
+                                id="descripcion"
+                                name="descripcion"
                                 rows={4}
                                 value={formData.descripcion}
-                                onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
+                                onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="course" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="idCurso" className="block text-sm font-medium text-gray-700">
                                 Curso
                             </label>
                             <select
-                                id="course"
-                                name="course"
-                                value={formData.nombreCurso}
-                                onChange={(e) => setFormData(prev => ({...prev, course: e.target.value}))}
+                                id="idCurso"
+                                name="idCurso"
+                                value={formData.idCurso}
+                                onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                                 required
                             >

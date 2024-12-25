@@ -3,6 +3,7 @@ export interface Subject {
     nombreAsignatura: string;
     descripcion: string;
     nombreCurso: string;
+    idCurso: number;
     acron: string;
 }
 

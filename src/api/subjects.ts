@@ -34,22 +34,16 @@ export const subjectsApi = {
         }
     },
 
-    create: async (subject: Omit<Subject, 'id'>): Promise<Subject> => {
+    createOrUpdateSubject: async (subject: Omit<Subject, 'id'>): Promise<Subject> => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/asignaturas`, subject);
+            const response = await axios.post(`${API_BASE_URL}/asignaturas`, subject, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error creating subject:', error);
-            throw error;
-        }
-    },
-
-    update: async (id: string, subject: Omit<Subject, 'id'>): Promise<Subject> => {
-        try {
-            const response = await axios.put(`${API_BASE_URL}/asignaturas/${id}`, subject);
-            return response.data;
-        } catch (error) {
-            console.error(`Error updating subject ${id}:`, error);
             throw error;
         }
     },

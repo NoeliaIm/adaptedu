@@ -7,8 +7,7 @@ interface UseSubjectsReturn {
     loading: boolean;
     error: Error | null;
     refetch: () => Promise<void>;
-    createSubject: (subject: Omit<Subject, 'id'>) => Promise<Subject>;
-    updateSubject: (id: string, subject: Omit<Subject, 'id'>) => Promise<Subject>;
+    createOrUpdateSubject: (subject: Omit<Subject, 'id'>) => Promise<Subject>;
     deleteSubject: (id: string) => Promise<void>;
 }
 
@@ -34,16 +33,10 @@ export const useSubjects = (): UseSubjectsReturn => {
         fetchSubjects();
     }, []);
 
-    const createSubject = async (subject: Omit<Subject, 'id'>): Promise<Subject> => {
-        const newSubject = await subjectsApi.create(subject);
+    const createOrUpdateSubject = async (subject: Omit<Subject, 'id'>): Promise<Subject> => {
+        const newSubject = await subjectsApi.createOrUpdateSubject(subject);
         await fetchSubjects(); // Refresh the list
         return newSubject;
-    };
-
-    const updateSubject = async (id: string, subject: Omit<Subject, 'id'>): Promise<Subject> => {
-        const updatedSubject = await subjectsApi.update(id, subject);
-        await fetchSubjects(); // Refresh the list
-        return updatedSubject;
     };
 
     const deleteSubject = async (id: string): Promise<void> => {
@@ -56,8 +49,7 @@ export const useSubjects = (): UseSubjectsReturn => {
         loading,
         error,
         refetch: fetchSubjects,
-        createSubject,
-        updateSubject,
+        createOrUpdateSubject,
         deleteSubject
     };
 };
