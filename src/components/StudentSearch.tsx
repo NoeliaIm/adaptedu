@@ -25,7 +25,7 @@ export default function StudentSearch({
                                       }: StudentSearchProps) {
     const navigate = useNavigate();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
-    const { subjects, loading, error } = useSubjects();
+    const { subjects, loadingSubjects, errorSubjects } = useSubjects();
 
     const getAvailableSubjects = () => {
         return subjects;
@@ -37,12 +37,12 @@ export default function StudentSearch({
         setShowDeleteConfirm(null);
     };
 
-    if (loading) {
-        return <p>Cargando asignaturas...</p>;
+    if (loadingSubjects) {
+        return <p>Cargando datos...</p>;
     }
 
-    if (error) {
-        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    if (errorSubjects) {
+        return <p>Error al cargar los datos. Por favor, inténtalo de nuevo.</p>;
     }
     return (
         <div className="bg-white rounded-xl shadow-lg p-8">

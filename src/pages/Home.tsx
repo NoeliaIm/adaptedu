@@ -4,12 +4,12 @@ import StudentSearch from '../components/StudentSearch';
 import StudentForm from '../components/StudentForm';
 import SubjectList from '../components/SubjectList';
 import {Student, Subject, TeacherForm as TeacherFormType} from '../types';
-import {mockStudents} from '../mockData';
 import { useSubjects } from "../hooks/useSubjects.ts";
+import  { useStudents } from "../hooks/useStudents.ts";
 
 
 function Home() {
-    const { subjects, loading, error } = useSubjects();
+    const { subjects, loadingSubjects, errorSubjects } = useSubjects();
     const [formData, setFormData] = useState<TeacherFormType>({
         firstName: '',
         lastName: '',
@@ -25,15 +25,15 @@ function Home() {
     });
 
     const [showStudentForm, setShowStudentForm] = useState(false);
-    const [students, setStudents] = useState<Student[]>(mockStudents);
+    const { students, loadingStudents, errorStudents } = useStudents();
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
-    if (loading) {
-        return <p>Cargando asignaturas...</p>;
+    if (loadingSubjects || loadingStudents) {
+        return <p>Cargando datos...</p>;
     }
 
-    if (error) {
-        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    if (errorSubjects || errorStudents) {
+        return <p>Error al cargar datos. Por favor, inténtalo de nuevo.</p>;
     }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
