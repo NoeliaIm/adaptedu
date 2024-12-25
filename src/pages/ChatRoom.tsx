@@ -39,7 +39,7 @@ function ChatRoom() {
 
         try {
 
-            const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJpZ2xlc2lhc20ubm9lbGlhQGdtYWlsLmNvbSIsImlkX3BlcnNvbmEiOjUsIm5vbWJyZSI6Ik5vZWxpYSIsImFwZWxsaWRvIjoiSWdsZXNpYXMiLCJyb2xlcyI6WyJBZG1pbmlzdHJhZG9yIl0sImlhdCI6MTczNDE4MDEzOSwiZXhwIjoxNzM0Nzg0OTM5fQ.SlOPx-ud_lPAEO0CUTnMCpcaKJDj5AHmx5JgyVXWXGR2VPbvcehrxYPUEkWAcmLnsv4T-5twRiAHgv0sw4X2ULSkzOtDcgqjCMp9mMiuzov7QmCsEUgUk_q0Oeg7DSxOHB3Nl4eO7yQYiIQdlI6N_feG7pu9RN39XA6iOXb7lutB8xSxzW_KFVk2FKqy_2GMUkBCN-TiJe8Mi8x_A9R9l9EksDsllkr-Z6SFY8ysB9jX_4b7QUoKxmH_bK_GLBKNL2zGqccFSiFg0TaG2x5i8uMNlMBRLPpRS5l7HB3j0gqPPHEme03xi1w-K1DkhRDm27LdqMwu4f4joHuv-UDtTA"
+            const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJpZ2xlc2lhc20ubm9lbGlhQGdtYWlsLmNvbSIsImlkX3BlcnNvbmEiOjUsIm5vbWJyZSI6Ik5vZWxpYSIsImFwZWxsaWRvIjoiSWdsZXNpYXMiLCJyb2xlcyI6WyJBZG1pbmlzdHJhZG9yIl0sImlhdCI6MTczNDc4NTMyMywiZXhwIjoxNzM1MzkwMTIzfQ.p9cMvaGLjkRCval4s9cz56tPKvT9BCKXtUUAvPEh8yXEVclUxbKv3jFn_RyIgqcnq-tG2Gen9CoMFpm91LEtrgxxLbDcp7ul4G4vJ6yPrUjOptGTEx_nFn34vNMSTmy7RCzVyyf9MEwpb1Svtqf21tikIENmPKSmHLjqP_RbOLPQH51roiRoev8LLsnr23nAhb9i0_Ga-bLXTVBhHhqIS23X2DIEWL83Dx6Ev-bVtRWWgqPb6DwgnjLGQHzZ446dE265pgirIPWs4RR-nujc12K2pZ0MjGpZmYw3bY1dxZyDnPYcThTQXO06nxmfL-tPiRhn1-B9xUDh3_YwGMlTAw";
             // Llamada al backend
             const response = await fetch('http://localhost:8080/api/edu-assistant/example', {
                 method: 'POST',

@@ -77,7 +77,7 @@ const mockAnalytics = {
 export default function StudentAnalytics() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const student = mockStudents.find(s => s.id === id);
+    const student = mockStudents.find(s => s.id === Number(id));
     const { subjects, loading, error } = useSubjects();
 
     if (!student) {

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Plus, Minus } from 'lucide-react';
-import type {Student, LanguageLevel, AcademicLevel, Subject} from '../types';
+import type {Student, NivelIdioma, NivelAmbitoAcademico, Subject} from '../types';
 import { useSubjects } from "../hooks/useSubjects.ts";
-import { useNivelAmbitoAcademico } from "../hooks/useAcademicLevels.ts"; // Importamos el nuevo hook
-import { NivelAmbitoAcademico } from "../types"; // Importamos el tipo adecuado
+import { useNivelAmbitoAcademico } from "../hooks/useAcademicLevels.ts";
+import { useNivelIdioma } from "../hooks/useLanguageLevels.ts";
+import { useNecesidadesEspeciales} from "../hooks/useSpecialNeeds.ts";
 
-const LANGUAGE_LEVELS: LanguageLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
 interface StudentFormProps {
     onSubmit: (student: Omit<Student, 'id'>) => void;
@@ -17,24 +17,20 @@ interface StudentFormProps {
 const defaultFormData: Omit<Student, 'id'> = {
     firstName: '',
     lastName: '',
-    recordNumber: '',
+    email: '',
+    recordNumber: 0,
     subjects: [],
-    isInternational: false,
     nationality: '',
-    nativeLanguage: '',
     languageLevels: [],
-    hasASD: false,
+    isInternational: false,
+    nativeLanguage: '',
     academicLevels: {
-        mathematics: {idNivelAcademico: 3, nombreNivelAcademico: 'Medio'},
-        literature: {idNivelAcademico: 3, nombreNivelAcademico: 'Medio'},
-        english: {idNivelAcademico: 3, nombreNivelAcademico: 'Medio'},
-        history: {idNivelAcademico: 3, nombreNivelAcademico: 'Medio'},
+        Matemáticas: {  idNivelAcademico: 3, nombreNivelAcademico: 'Medio' },
+        Lengua: {  idNivelAcademico: 3, nombreNivelAcademico: 'Medio' },
+        Inglés: {  idNivelAcademico: 3, nombreNivelAcademico: 'Medio' } ,
+        Historia: {  idNivelAcademico: 3, nombreNivelAcademico: 'Medio' } ,
     },
-    specialNeeds: {
-        adhd: false,
-        highAbilities: false,
-        pas: false,
-    },
+    specialNeeds:[]
 };
 
 export default function StudentForm({
@@ -44,7 +40,9 @@ export default function StudentForm({
                                     }: StudentFormProps) {
     const [formData, setFormData] = useState<Omit<Student, 'id'>>(defaultFormData);
     const { subjects, loading: subjectsLoading, error: subjectsError } = useSubjects();
-    const { nivelesAcademicos, loading: nivelesLoading, error: nivelesError } = useNivelAmbitoAcademico(); // Usamos el hook para niveles académicos
+    const { nivelesAcademicos, loading: nivelesAcademicosLoading, error: nivelesAcademicosError } = useNivelAmbitoAcademico();
+    const { nivelesIdioma, loading: nivelesIdiomaLoading, error: nivelesIdiomaError } = useNivelIdioma();
+    const { necesidadesEspeciales, loading: necesidadesEspecialesLoading, error: necesidadesEspecialesError } = useNecesidadesEspeciales();
 
     const availableSubjects = () => {
         return subjects.filter(
@@ -55,16 +53,16 @@ export default function StudentForm({
     // Cargar datos iniciales cuando se edita un estudiante existente
     useEffect(() => {
         if (initialData) {
-            const { id, ...studentData } = initialData;
+            const { id, ...studentData } = initialData;   //const { ...studentData } = initialData;
             setFormData(studentData);
         }
     }, [initialData]);
 
-    if (subjectsLoading || nivelesLoading) {
+    if (subjectsLoading || nivelesAcademicosLoading || nivelesIdiomaLoading || necesidadesEspecialesLoading) {
         return <p>Cargando datos...</p>;
     }
 
-    if (subjectsError || nivelesError) {
+    if (subjectsError || nivelesAcademicosError || nivelesIdiomaError || necesidadesEspecialesError) {
         return <p>Error al cargar los datos. Por favor, inténtalo de nuevo.</p>;
     }
 
@@ -92,10 +90,11 @@ export default function StudentForm({
         setFormData((prev) => ({
             ...prev,
             subjects: prev.subjects.map((subject) =>
-                subject.idAsignatura === id ? newSubject : subject
+                subject.idAsignatura === id ? { ...subject, ...newSubject } : subject
             ),
         }));
     };
+
     const removeSubject = (id: number | undefined) => {
         setFormData((prev) => ({
             ...prev,
@@ -109,20 +108,45 @@ export default function StudentForm({
         );
     };
 
-    const handleLanguageLevelChange = (index: number, field: 'language' | 'level', value: string) => {
+    const handleLanguageLevelChange = (field: keyof typeof formData.languageLevels,  value: number) => {
         setFormData((prev) => ({
             ...prev,
-            languageLevels: prev.languageLevels.map((item, i) =>
-                i === index ? { ...item, [field]: value } : item
-            ),
+            languageLevelsLevels: {
+                ...prev.languageLevels,
+                [field]: nivelesIdioma.find((level) => level.idNivelIdioma === value) || prev.languageLevels[field],
+            },
         }));
     };
 
     const addLanguage = () => {
-        setFormData((prev) => ({
-            ...prev,
-            languageLevels: [...prev.languageLevels, { language: '', level: 'A1' }],
-        }));
+        // Validamos que existan niveles cargados
+        if (!nivelesIdioma || nivelesIdioma.length === 0) {
+            alert('No hay niveles de idioma disponibles para añadir.');
+            return;
+        }
+
+        // Validamos que no haya un idioma sin completar
+        const hasEmptyLanguage = formData.languageLevels.some(
+            (item) => !item.idioma.nombreIdioma.trim()
+        );
+
+        if (hasEmptyLanguage) {
+            alert('Por favor, completa el idioma pendiente antes de añadir uno nuevo.');
+            return;
+        }
+
+ // Añadimos un nuevo idioma con el primer nivel disponible
+setFormData((prev) => ({
+    ...prev,
+    languageLevels: [
+        ...prev.languageLevels,
+        {
+            idioma: { idIdioma: 0, nombreIdioma: '' },
+            nivelIdioma: { idNivelIdioma: nivelesIdioma[0].idNivelIdioma, nombreNivelIdioma: nivelesIdioma[0].nombreNivelIdioma },
+            nativo: false
+        },
+    ],
+}));
     };
 
     const removeLanguage = (index: number) => {
@@ -132,12 +156,12 @@ export default function StudentForm({
         }));
     };
 
-    const handleAcademicLevelChange = (subject: keyof Student['academicLevels'], level: AcademicLevel) => {
+    const handleAcademicLevelChange =(field: keyof typeof formData.academicLevels, value: number) => {
         setFormData((prev) => ({
             ...prev,
             academicLevels: {
                 ...prev.academicLevels,
-                [subject]: level,
+                [field]: nivelesAcademicos.find((level) => level.idNivelAcademico === value) || prev.academicLevels[field],
             },
         }));
     };
@@ -145,6 +169,18 @@ export default function StudentForm({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSubmit(formData);
+    };
+
+    const handleSpecialNeedChange = (id: number) => {
+        setFormData((prev) => {
+            const exists = prev.specialNeeds.some((need) => need.idNecesidadEspecial === id);
+            return {
+                ...prev,
+                specialNeeds: exists
+                    ? prev.specialNeeds.filter((need) => need.idNecesidadEspecial !== id)
+                    : [...prev.specialNeeds, necesidadesEspeciales.find((need) => need.idNecesidadEspecial === id)!],
+            };
+        });
     };
 
     return (
@@ -178,6 +214,20 @@ export default function StudentForm({
                             name="lastName"
                             required
                             value={formData.lastName}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                            Email
+                        </label>
+                        <input
+                            type="text"
+                            id="email"
+                            name="email"
+                            required
+                            value={formData.email}
                             onChange={handleInputChange}
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                         />
@@ -312,19 +362,20 @@ export default function StudentForm({
                             <div key={index} className="flex gap-4 items-center mb-4">
                                 <input
                                     type="text"
-                                    value={lang.language}
-                                    onChange={(e) => handleLanguageLevelChange(index, 'language', e.target.value)}
+                                    value={lang.idioma.nombreIdioma}
+                                    onChange={(e) => handleLanguageLevelChange(index, parseInt(e.target.value))}
                                     placeholder="Idioma"
                                     className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                                 />
                                 <select
-                                    value={lang.level}
-                                    onChange={(e) => handleLanguageLevelChange(index, 'level', e.target.value as LanguageLevel)}
+                                    value={lang.nivelIdioma.idNivelIdioma}
+                                    onChange={(e) => handleLanguageLevelChange(index,
+                                        parseInt(e.target.value))}
                                     className="rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                                 >
-                                    {LANGUAGE_LEVELS.map((level) => (
-                                        <option key={level} value={level}>
-                                            {level}
+                                    {nivelesIdioma.map((level: NivelIdioma) => (
+                                        <option key={level.idNivelIdioma} value={level.idNivelIdioma}>
+                                            {level.nombreNivelIdioma}
                                         </option>
                                     ))}
                                 </select>
@@ -341,69 +392,21 @@ export default function StudentForm({
                 </div>
 
                 {/* Special Needs */}
+                {/* Special Needs */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-medium text-gray-900">Necesidades Especiales</h3>
-
-                    <div className="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="hasASD"
-                            name="hasASD"
-                            checked={formData.hasASD}
-                            onChange={handleInputChange}
-                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <label htmlFor="hasASD" className="ml-2 text-sm font-medium text-gray-700">
-                            TEA
-                        </label>
-                    </div>
-
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <label className="inline-flex items-center">
-                            <input
-                                type="checkbox"
-                                name="adhd"
-                                checked={formData.specialNeeds.adhd}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        specialNeeds: {...prev.specialNeeds, adhd: e.target.checked},
-                                    }))
-                                }
-                                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <span className="ml-2 text-sm text-gray-700">TDAH</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                            <input
-                                type="checkbox"
-                                name="highAbilities"
-                                checked={formData.specialNeeds.highAbilities}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        specialNeeds: {...prev.specialNeeds, highAbilities: e.target.checked},
-                                    }))
-                                }
-                                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <span className="ml-2 text-sm text-gray-700">Altas Capacidades</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                            <input
-                                type="checkbox"
-                                name="pas"
-                                checked={formData.specialNeeds.pas}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        specialNeeds: {...prev.specialNeeds, pas: e.target.checked},
-                                    }))
-                                }
-                                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <span className="ml-2 text-sm text-gray-700">PAS</span>
-                        </label>
+                        {necesidadesEspeciales.map((need) => (
+                            <label key={need.idNecesidadEspecial} className="inline-flex items-center">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.specialNeeds.some((sn) => sn.idNecesidadEspecial === need.idNecesidadEspecial)}
+                                    onChange={() => handleSpecialNeedChange(need.idNecesidadEspecial)}
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">{need.nombreNecesidadEspecial}</span>
+                            </label>
+                        ))}
                     </div>
                 </div>
 
@@ -418,11 +421,11 @@ export default function StudentForm({
                             </label>
                             <div className="sm:col-span-4">
                                 <select
-                                    value={level}
+                                    value={level.idNivelAcademico}
                                     onChange={(e) =>
                                         handleAcademicLevelChange(
                                             subject as keyof Student['academicLevels'],
-                                            e.target.value as AcademicLevel
+                                            parseInt(e.target.value)
                                         )
                                     }
                                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"

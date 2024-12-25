@@ -18,7 +18,7 @@ export const useCourses = (): UseCoursesReturn => {
     const fetchCourses = async () => {
         try {
             setLoading(true);
-            const data = await coursesApi.getAllActive(); // Llámalo desde los métodos existentes en tu API
+            const data = await coursesApi.getAllActive();
             setCourses(data);
         } catch (err) {
             setError(err instanceof Error ? err : new Error("Error al obtener los cursos"));

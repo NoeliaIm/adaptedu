@@ -13,6 +13,7 @@ function Home() {
     const [formData, setFormData] = useState<TeacherFormType>({
         firstName: '',
         lastName: '',
+        email: '',
         subjects:  subjects.length > 0 ? [{ ...subjects[0] }] : [],
     });
 
@@ -137,7 +138,7 @@ function Home() {
         } else {
             const newStudent: Student = {
                 ...studentData,
-                id: crypto.randomUUID(),
+                id: Date.now(),
             };
             setStudents((prev) => [...prev, newStudent]);
         }

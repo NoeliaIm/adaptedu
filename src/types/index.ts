@@ -9,34 +9,38 @@ export interface Subject {
 export interface TeacherForm {
     firstName: string;
     lastName: string;
+    email: string;
     subjects: Subject[];
 }
 
 export interface Student {
-    id: string;
-    firstName: string;
-    lastName: string;
-    recordNumber: string;
-    subjects: Subject[];
-    isInternational: boolean;
-    nationality?: string;
-    nativeLanguage: string;
+    id: number; // ID del estudiante
+    recordNumber: number; // Equivalente a "numeroExpediente"
+    firstName: string; // "personaDTO.nombre"
+    lastName: string; // "personaDTO.apellido1 + personaDTO.apellido2" (concatenar)
+    email?: string; // Nuevo campo de "personaDTO.email"
+    nationality?: string; // Nuevo campo de "personaDTO.nacionalidad"
+    subjects: Subject[]; // Array de asignaturas
+    isInternational: boolean; // "extranjero"
+    nativeLanguage?: string; // Idioma nativo (basado en "idiomas[nativo=true]")
     languageLevels: {
-        language: string;
-        level: LanguageLevel;
-    }[];
-    hasASD: boolean;
+        idioma: {
+            idIdioma: number; // ID del idioma
+            nombreIdioma: string; // Nombre del idioma
+        };
+        nivelIdioma: {
+            idNivelIdioma: number; // ID del nivel
+            nombreNivelIdioma: string; // Nombre del nivel del idioma
+        };
+        nativo: boolean; // Indica si es el idioma nativo
+    }[]; // Nueva estructura basada en la API
+    specialNeeds: NecesidadesEspeciales[]; // Array de necesidades especiales
     academicLevels: {
-        mathematics: AcademicLevel;
-        literature: AcademicLevel;
-        english: AcademicLevel;
-        history: AcademicLevel;
-    };
-    specialNeeds: {
-        adhd: boolean;
-        highAbilities: boolean;
-        pas: boolean;
-    };
+        [key: string]: {
+            idNivelAcademico: number; // ID del nivel académico
+            nombreNivelAcademico: string; // Nombre del nivel académico
+        };
+    }; // Basado en "ambitos"
 }
 
 export interface Course {
@@ -63,9 +67,12 @@ export interface Idioma {
 }
 
 export interface NivelIdioma {
-    idNivel: number;
-    nombreNivel: string;
+    idNivelIdioma: number;
+    nombreNivelIdioma: string;
 }
 
-export type LanguageLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
-export type AcademicLevel = 'Bajo' | 'Medio-Bajo' | 'Medio' | 'Medio-Alto' | 'Alto';
+
+export interface NecesidadesEspeciales {
+    idNecesidadEspecial: number
+    nombreNecesidadEspecial: string
+}
