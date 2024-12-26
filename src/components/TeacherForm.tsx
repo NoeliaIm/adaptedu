@@ -13,6 +13,7 @@ interface TeacherFormProps {
     onSubmit: (e: React.FormEvent) => void;
     isFormValid: () => boolean;
     submitted: boolean;
+    onResetForm: () => void;
 }
 
 export default function TeacherFormComponent({
@@ -24,6 +25,7 @@ export default function TeacherFormComponent({
                                                  onSubmit,
                                                  isFormValid,
                                                  submitted,
+                                                 onResetForm
                                              }: TeacherFormProps) {
     const [showSummary, setShowSummary] = useState(true);
     const { subjects, loadingSubjects, errorSubjects } = useSubjects();
@@ -42,6 +44,12 @@ export default function TeacherFormComponent({
     if (errorSubjects) {
         return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
     }
+
+    const handleResetForm = (showSummary: boolean) => {
+        setShowSummary(showSummary);
+        onResetForm();
+    };
+
     return (
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
             <div className="flex items-center gap-3 mb-8">
@@ -159,6 +167,7 @@ export default function TeacherFormComponent({
                     <button
                         type="submit"
                         disabled={!isFormValid()}
+                        onClick={() => setShowSummary(true)}
                         className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                     >
                         <Save className="w-4 h-4 mr-2" />
@@ -170,7 +179,7 @@ export default function TeacherFormComponent({
             {submitted && showSummary && (
                 <div className="mt-6 p-4 bg-green-50 rounded-md relative">
                     <button
-                        onClick={() => setShowSummary(false)}
+                        onClick={() => handleResetForm(false)}
                         className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
                     >
                         <X className="w-4 h-4" />

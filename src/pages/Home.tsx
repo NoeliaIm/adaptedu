@@ -39,6 +39,17 @@ function Home() {
         return <p>Error al cargar datos. Por favor, inténtalo de nuevo.</p>;
     }
 
+
+    const resetFormData = () => {
+        setFormData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            subjects: [],
+        });
+        setSubmitted(false);
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
         setFormData((prev) => ({
@@ -166,6 +177,7 @@ function Home() {
                     <>
                         <TeacherForm
                             formData={formData}
+                            onResetForm={resetFormData}
                             onInputChange={handleInputChange}
                             onSubjectChange={handleSubjectChange}
                             onAddSubject={addSubject}

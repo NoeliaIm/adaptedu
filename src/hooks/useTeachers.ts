@@ -14,7 +14,7 @@ export const useTeachers = (): UseTeachersReturn => {
             persona: {
                 nombre: teacher.firstName,
                 apellido1: teacher.lastName.split(' ')[0],
-                apellido2: teacher.lastName.split(' ')[1] || '',
+                apellido2: teacher.lastName.split(' ').slice(1).join(' ') || '',
                 email: teacher.email,
             },
             asignaturas: teacher.subjects.map((subject: Subject) => ({
