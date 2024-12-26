@@ -77,3 +77,17 @@ export interface NecesidadesEspeciales {
     idNecesidadEspecial: number
     nombreNecesidadEspecial: string
 }
+
+export interface Teacher {
+    idProfesor: number
+    persona: Persona
+    asignaturas: Subject[]
+}
+
+export interface Persona {
+    id: number
+    nombre: string
+    apellido1: string
+    apellido2: string
+    email: string
+}

@@ -4,8 +4,8 @@ import { studentsApi } from '../api/students';
 
 interface UsestudentsReturn {
     students: Student[];
-    loading: boolean;
-    error: Error | null;
+    loadingStudents: boolean;
+    errorStudents: Error | null;
     refetch: () => Promise<void>;
     createStudent: (subject: Omit<Student, 'id'>) => Promise<Student>;
     updateStudent: (id: string, subject: Omit<Student, 'id'>) => Promise<Student>;
@@ -14,8 +14,8 @@ interface UsestudentsReturn {
 
 export const useStudents = (): UsestudentsReturn => {
     const [students, setStudents] = useState<Student[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+    const [loadingStudents, setLoadingStudents] = useState(true);
+    const [errorStudents, setErrorStudents] = useState<Error | null>(null);
 
     const mapStudentData = (data: any[]): Student[] => {
 
@@ -59,15 +59,15 @@ export const useStudents = (): UsestudentsReturn => {
 
     const fetchStudents = async () => {
         try {
-            setLoading(true);
+            setLoadingStudents(true);
             const data = await studentsApi.getAll();
             const mappedData = mapStudentData(data);
             setStudents(mappedData);
-            setError(null);
+            setErrorStudents(null);
         } catch (err) {
-            setError(err instanceof Error ? err : new Error('An error occurred'));
+            setErrorStudents(err instanceof Error ? err : new Error('An error occurred'));
         } finally {
-            setLoading(false);
+            setLoadingStudents(false);
         }
     };
 
@@ -94,8 +94,8 @@ export const useStudents = (): UsestudentsReturn => {
 
     return {
         students,
-        loading,
-        error,
+        loadingStudents,
+        errorStudents,
         refetch: fetchStudents,
         createStudent,
         updateStudent,

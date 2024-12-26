@@ -3,6 +3,7 @@ import { PlusCircle, MinusCircle, GraduationCap, Save, X } from 'lucide-react';
 import { TeacherForm, Subject } from '../types';
 import {useSubjects} from "../hooks/useSubjects.ts";
 
+
 interface TeacherFormProps {
     formData: TeacherForm;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -25,7 +26,8 @@ export default function TeacherFormComponent({
                                                  submitted,
                                              }: TeacherFormProps) {
     const [showSummary, setShowSummary] = useState(true);
-    const { subjects, loading, error } = useSubjects();
+    const { subjects, loadingSubjects, errorSubjects } = useSubjects();
+
 
     const getAvailableSubjects = () => {
         return subjects.filter(
@@ -33,11 +35,11 @@ export default function TeacherFormComponent({
         );
     };
 
-    if (loading) {
+    if (loadingSubjects) {
         return <p>Cargando asignaturas...</p>;
     }
 
-    if (error) {
+    if (errorSubjects) {
         return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
     }
     return (

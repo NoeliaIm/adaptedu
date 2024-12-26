@@ -78,7 +78,7 @@ export default function StudentAnalytics() {
     const { id } = useParams();
     const navigate = useNavigate();
     const student = mockStudents.find(s => s.id === Number(id));
-    const { subjects, loading, error } = useSubjects();
+    const { subjects, loadingSubjects, errorSubjects } = useSubjects();
 
     if (!student) {
         return (
@@ -95,11 +95,11 @@ export default function StudentAnalytics() {
         return subjects;
     };
 
-    if (loading) {
+    if (loadingSubjects) {
         return <p>Cargando asignaturas...</p>;
     }
 
-    if (error) {
+    if (errorSubjects) {
         return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
     }
 

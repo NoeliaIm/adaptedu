@@ -13,14 +13,16 @@ export const mockStudents: Student[] = [
                 nombreAsignatura: 'Matemáticas',
                 nombreCurso: '1º ESO',
                 descripcion: 'Matemáticas generales y cálculo',
-                acron: 'MAT'
+                acron: 'MAT',
+                idCurso: 1
             },
             {
                 idAsignatura: 3,
                 nombreAsignatura: 'Inglés',
                 nombreCurso: '1º ESO',
                 descripcion: 'Inglés como lengua extranjera',
-                acron: 'ING'
+                acron: 'ING',
+                idCurso: 1
             }
         ],
         isInternational: false,
@@ -87,28 +89,32 @@ export const mockStudents: Student[] = [
                 nombreAsignatura: 'Matemáticas',
                 nombreCurso: '1º ESO',
                 descripcion: 'Matemáticas generales y cálculo',
-                acron: 'MAT'
+                acron: 'MAT',
+                idCurso: 1
             },
             {
                 idAsignatura: 3,
                 nombreAsignatura: 'Inglés',
                 nombreCurso: '1º ESO',
                 descripcion: 'Inglés como lengua extranjera',
-                acron: 'ING'
+                acron: 'ING',
+                idCurso: 1
             },
             {
                 idAsignatura: 4,
                 nombreAsignatura: 'Historia',
                 nombreCurso: '1º ESO',
                 descripcion: 'Historia universal y de España',
-                acron: 'HIS'
+                acron: 'HIS',
+                idCurso: 1
             },
             {
                 idAsignatura: 2,
                 nombreAsignatura: 'Lengua',
                 nombreCurso: '1º ESO',
                 descripcion: 'Lengua castellana y literatura',
-                acron: 'LEN'
+                acron: 'LEN',
+                idCurso: 1
             }
         ],
         isInternational: true,

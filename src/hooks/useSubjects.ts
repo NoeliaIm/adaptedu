@@ -4,8 +4,8 @@ import { subjectsApi } from '../api/subjects';
 
 interface UseSubjectsReturn {
     subjects: Subject[];
-    loading: boolean;
-    error: Error | null;
+    loadingSubjects: boolean;
+    errorSubjects: Error | null;
     refetch: () => Promise<void>;
     createOrUpdateSubject: (subject: Omit<Subject, 'id'>) => Promise<Subject>;
     deleteSubject: (id: string) => Promise<void>;
@@ -13,19 +13,19 @@ interface UseSubjectsReturn {
 
 export const useSubjects = (): UseSubjectsReturn => {
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+    const [loadingSubjects, setLoadingSubjects] = useState(true);
+    const [errorSubjects, setErrorSubjects] = useState<Error | null>(null);
 
     const fetchSubjects = async () => {
         try {
-            setLoading(true);
+            setLoadingSubjects(true);
             const data = await subjectsApi.getAll();
             setSubjects(data);
-            setError(null);
+            setErrorSubjects(null);
         } catch (err) {
-            setError(err instanceof Error ? err : new Error('An error occurred'));
+            setErrorSubjects(err instanceof Error ? err : new Error('An error occurred'));
         } finally {
-            setLoading(false);
+            setLoadingSubjects(false);
         }
     };
 
@@ -46,8 +46,8 @@ export const useSubjects = (): UseSubjectsReturn => {
 
     return {
         subjects,
-        loading,
-        error,
+        loadingSubjects,
+        errorSubjects,
         refetch: fetchSubjects,
         createOrUpdateSubject,
         deleteSubject

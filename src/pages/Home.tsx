@@ -6,6 +6,7 @@ import SubjectList from '../components/SubjectList';
 import {Student, Subject, TeacherForm as TeacherFormType} from '../types';
 import { useSubjects } from "../hooks/useSubjects.ts";
 import  { useStudents } from "../hooks/useStudents.ts";
+import { useTeachers} from "../hooks/useTeachers.ts";
 
 
 function Home() {
@@ -27,6 +28,8 @@ function Home() {
     const [showStudentForm, setShowStudentForm] = useState(false);
     const { students, loadingStudents, errorStudents } = useStudents();
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+    const { createTeacher } = useTeachers();
+
 
     if (loadingSubjects || loadingStudents) {
         return <p>Cargando datos...</p>;
@@ -84,7 +87,7 @@ function Home() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (isFormValid()) {
-            setSubmitted(true);
+            createTeacher(formData).then(() =>  setSubmitted(true));
         }
     };
 
@@ -128,19 +131,19 @@ function Home() {
 
     const handleStudentSubmit = (studentData: Omit<Student, 'id'>) => {
         if (selectedStudent) {
-            setStudents((prev) =>
+         /*   setStudents((prev) =>
                 prev.map((student) =>
                     student.id === selectedStudent.id
                         ? {...studentData, id: student.id}
                         : student
                 )
-            );
+            );*/
         } else {
-            const newStudent: Student = {
+         /*   const newStudent: Student = {
                 ...studentData,
                 id: Date.now(),
             };
-            setStudents((prev) => [...prev, newStudent]);
+            setStudents((prev) => [...prev, newStudent]);*/
         }
         setShowStudentForm(false);
         setSelectedStudent(null);
