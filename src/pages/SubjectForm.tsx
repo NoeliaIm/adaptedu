@@ -8,7 +8,7 @@ import { useCourses } from "../hooks/useCourses.ts";
 export default function SubjectForm() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { subjects, loading, error, createOrUpdateSubject} = useSubjects();
+    const { subjects, loadingSubjects, errorSubjects, createOrUpdateSubject} = useSubjects();
     const { courses } = useCourses();
     const [formData, setFormData] = useState<Omit<Subject, 'id'>>({
         nombreAsignatura: '',
@@ -38,12 +38,12 @@ export default function SubjectForm() {
         }
     }, [id, subjects]);
 
-    if (loading) {
+    if (loadingSubjects) {
         return <p>Cargando asignaturas...</p>;
     }
 
-    if (error) {
-        return <p>Error al cargar asignaturas: {error.message}</p>;
+    if (errorSubjects) {
+        return <p>Error al cargar asignaturas: {errorSubjects.message}</p>;
     }
 
 

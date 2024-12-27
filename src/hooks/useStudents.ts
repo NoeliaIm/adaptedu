@@ -8,8 +8,7 @@ interface UsestudentsReturn {
     errorStudents: Error | null;
     refetch: () => Promise<void>;
     createOrUpdateStudent: (subject: Omit<Student, 'id'>) => Promise<Student>;
-    updateStudent: (id: string, subject: Omit<Student, 'id'>) => Promise<Student>;
-    deleteStudent: (id: string) => Promise<void>;
+    deleteStudent: (id: number) => Promise<void>;
 }
 
 export const useStudents = (): UsestudentsReturn => {
@@ -23,6 +22,13 @@ export const useStudents = (): UsestudentsReturn => {
             const nativeLanguage = idiomas.find(idioma => idioma.nativo);
             return nativeLanguage ? nativeLanguage.idioma.nombreIdioma : undefined;
         };
+
+
+        const othersLanguages = (idiomas: any[]): { idioma: { idIdioma: number; nombreIdioma: string }, nivelIdioma: { idNivelIdioma: number; nombreNivelIdioma: string }, nativo: boolean }[] => {
+            // quiero devolver todos los idiomas que no sean nativos
+            return  idiomas.filter(idioma => !idioma.nativo);
+        };
+
         const setLastName = (personaDTO: any): string => {
             if (!personaDTO.apellido2) {
                 return personaDTO.apellido1;
@@ -51,7 +57,7 @@ export const useStudents = (): UsestudentsReturn => {
             subjects: item.asignaturas,
             isInternational: item.extranjero,
             nativeLanguage: findNativeLanguage(item.idiomas),
-            languageLevels: item.idiomas,
+            languageLevels: othersLanguages(item.idiomas),
             specialNeeds: item.necesidadesEspeciales,
             academicLevels: setAcademicLevels(item.ambitos),
         }));
@@ -154,15 +160,16 @@ export const useStudents = (): UsestudentsReturn => {
         return newStudent;
     };
 
-    const updateStudent = async (id: string, subject: Omit<Student, 'id'>): Promise<Student> => {
-        const updatedStudent = await studentsApi.update(id, subject);
-        await fetchStudents(); // Refresh the list
-        return updatedStudent;
-    };
 
-    const deleteStudent = async (id: string): Promise<void> => {
-        await studentsApi.delete(id);
-        await fetchStudents(); // Refresh the list
+    const deleteStudent = async (id: number): Promise<void> => {
+        console.log('Deleting student:', id);
+        try {
+            await studentsApi.delete(id);
+            console.log('Student deleted from API');
+            await fetchStudents();
+        } catch (err) {
+            console.error('Error in deleteStudent:', err);
+        }
     };
 
     return {
@@ -171,7 +178,6 @@ export const useStudents = (): UsestudentsReturn => {
         errorStudents,
         refetch: fetchStudents,
         createOrUpdateStudent,
-        updateStudent,
         deleteStudent
     };
 };

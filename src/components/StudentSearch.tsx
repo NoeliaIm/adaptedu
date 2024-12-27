@@ -14,6 +14,7 @@ interface StudentSearchProps {
     filteredStudents: Student[];
     onAddStudent: () => void;
     onEditStudent: (student: Student) => void;
+    deleteStudent: (id: number) => Promise<void>;
 }
 
 export default function StudentSearch({
@@ -22,18 +23,19 @@ export default function StudentSearch({
                                           filteredStudents,
                                           onAddStudent,
                                           onEditStudent,
+                                          deleteStudent
                                       }: StudentSearchProps) {
     const navigate = useNavigate();
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
     const { subjects, loadingSubjects, errorSubjects } = useSubjects();
 
     const getAvailableSubjects = () => {
         return subjects;
     };
 
-    const handleDelete = (studentId: string) => {
-        // Here you would implement the actual delete logic
+    const handleDelete = async (studentId: number) => {
         console.log('Deleting student:', studentId);
+        await deleteStudent(studentId);
         setShowDeleteConfirm(null);
     };
 

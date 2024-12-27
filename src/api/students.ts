@@ -52,19 +52,16 @@ export const studentsApi = {
         }
     },
 
-    update: async (id: string, student: Omit<Student, 'id'>): Promise<Student> => {
+    delete: async (id: number): Promise<void> => {
         try {
-            const response = await axios.put(`${API_BASE_URL}/alumnos/${id}`, student);
-            return response.data;
-        } catch (error) {
-            console.error(`Error updating student ${id}:`, error);
-            throw error;
-        }
-    },
-
-    delete: async (id: string): Promise<void> => {
-        try {
-            await axios.delete(`${API_BASE_URL}/alumnos/${id}`);
+            if (!token) {
+                throw new Error('Token no disponible. Por favor, inicia sesión.');
+            }
+            await axios.delete(`${API_BASE_URL}/alumnos/${id}`,{
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
         } catch (error) {
             console.error(`Error deleting student ${id}:`, error);
             throw error;

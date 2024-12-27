@@ -12,7 +12,7 @@ export default function SubjectList() {
         course: ''
     });
 
-    const { subjects, loading, error } = useSubjects();
+    const { subjects, loadingSubjects, errorSubjects } = useSubjects();
     const { courses } = useCourses();
 
     const getAvailableCourses = () => {
@@ -20,11 +20,11 @@ export default function SubjectList() {
     }
 
 
-    if (loading) {
+    if (loadingSubjects) {
         return <p>Cargando asignaturas...</p>;
     }
 
-    if (error) {
+    if (errorSubjects) {
         return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
     }
 

@@ -195,6 +195,16 @@ setFormData((prev) => ({
         });
     };
 
+    function handleInputInternational() {
+        setFormData((prev) => ({
+            ...prev,
+            isInternational: !prev.isInternational,
+        }));
+        if(!formData.isInternational && formData.nationality === "España") {
+            formData.nationality = "";
+        }
+    }
+
     return (
         <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-xl shadow-lg">
             <div className="space-y-6">
@@ -316,7 +326,7 @@ setFormData((prev) => ({
                             id="isInternational"
                             name="isInternational"
                             checked={formData.isInternational}
-                            onChange={handleInputChange}
+                            onChange={handleInputInternational}
                             className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                         />
                         <label htmlFor="isInternational" className="ml-2 text-sm font-medium text-gray-700">

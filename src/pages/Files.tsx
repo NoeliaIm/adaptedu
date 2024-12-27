@@ -24,7 +24,8 @@ const mockFiles: FileRecord[] = [
             nombreAsignatura: 'Matemáticas',
             nombreCurso: '1º ESO',
             descripcion: 'Matemáticas generales y cálculo',
-            acron: 'MAT'
+            acron: 'MAT',
+            idCurso: 1
         },
         uploadDate: new Date('2024-03-15'),
         size: 1500000,
@@ -37,7 +38,8 @@ const mockFiles: FileRecord[] = [
             nombreAsignatura: 'Lengua',
             nombreCurso: '1º ESO',
             descripcion: 'Lengua castellana y literatura',
-            acron: 'LEN'
+            acron: 'LEN',
+            idCurso: 1
         },
         uploadDate: new Date('2024-03-14'),
         size: 2500000,
@@ -54,7 +56,7 @@ function Files() {
     const [files, setFiles] = useState<FileRecord[]>(mockFiles);
     const [filters, setFilters] = useState({ name: '', subject: '' });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
-    const { subjects, loading, error } = useSubjects();
+    const { subjects, loadingSubjects, errorSubjects } = useSubjects();
 
     const handleFileSelect = (file: File | null) => {
         setSelectedFile(file);
@@ -64,10 +66,10 @@ function Files() {
         return subjects;
     };
 
-    if (loading) {
+    if (loadingSubjects) {
         return <p>Cargando asignaturas...</p>;
     }
-    if (error) {
+    if (errorSubjects) {
         return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
     }
 

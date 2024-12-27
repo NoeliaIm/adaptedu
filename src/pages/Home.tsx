@@ -26,7 +26,7 @@ function Home() {
     });
 
     const [showStudentForm, setShowStudentForm] = useState(false);
-    const { students, loadingStudents, errorStudents, createOrUpdateStudent } = useStudents();
+    const { students, loadingStudents, errorStudents, createOrUpdateStudent, deleteStudent } = useStudents();
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const { createTeacher } = useTeachers();
 
@@ -140,7 +140,7 @@ function Home() {
         setShowStudentForm(true);
     };
 
-    const handleStudentSubmit = (studentData: Omit<Student, 'id'>) => {
+    const handleStudentSubmit = (studentData:  Omit<Student, 'id'>) => {
         if (studentData) {
             createOrUpdateStudent(studentData).then(() => {
                 setShowStudentForm(false);
@@ -189,6 +189,7 @@ function Home() {
                             filteredStudents={filteredStudents}
                             onAddStudent={handleAddStudent}
                             onEditStudent={handleEditStudent}
+                            deleteStudent={deleteStudent}
                         />
 
                     </>
