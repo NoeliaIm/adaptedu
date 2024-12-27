@@ -15,11 +15,12 @@ export interface TeacherForm {
 }
 
 export interface Student {
-    id: number; // ID del estudiante
+    id: number | null; // ID del estudiante
     recordNumber: number; // Equivalente a "numeroExpediente"
+    idPersona: number | null; // ID de la persona
     firstName: string; // "personaDTO.nombre"
     lastName: string; // "personaDTO.apellido1 + personaDTO.apellido2" (concatenar)
-    email?: string; // Nuevo campo de "personaDTO.email"
+    email: string; // Nuevo campo de "personaDTO.email"
     nationality?: string; // Nuevo campo de "personaDTO.nacionalidad"
     subjects: Subject[]; // Array de asignaturas
     isInternational: boolean; // "extranjero"
@@ -54,7 +55,6 @@ export interface Course {
 export interface AmbitoAcademico {
     idAmbito: number;
     nombreAmbito: string;
-    nivelAmbito: NivelAmbitoAcademico;
 }
 
 export interface NivelAmbitoAcademico {
@@ -85,9 +85,28 @@ export interface Teacher {
 }
 
 export interface Persona {
-    id: number
+    id: number | null
     nombre: string
     apellido1: string
     apellido2: string
     email: string
+}
+
+export interface StudentApi {
+    id: number | null;
+    numeroExpediente: number;
+    persona: Persona
+    asignaturas: Subject[]
+    necesidadesEspeciales: NecesidadesEspeciales[];
+    idiomas: {
+        nivelIdioma: NivelIdioma;
+        idioma: Idioma;
+        nativo: boolean;
+    }[];
+    ambitos: {
+        ambito: AmbitoAcademico
+        nivelAcademico:NivelAmbitoAcademico
+    }[];
+    extranjero: boolean;
+    nacionalidad: string;
 }

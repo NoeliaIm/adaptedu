@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Student } from '../types';
+import { Student, StudentApi } from '../types';
 import { studentsApi } from '../api/students';
 
 interface UsestudentsReturn {
@@ -7,7 +7,7 @@ interface UsestudentsReturn {
     loadingStudents: boolean;
     errorStudents: Error | null;
     refetch: () => Promise<void>;
-    createStudent: (subject: Omit<Student, 'id'>) => Promise<Student>;
+    createOrUpdateStudent: (subject: Omit<Student, 'id'>) => Promise<Student>;
     updateStudent: (id: string, subject: Omit<Student, 'id'>) => Promise<Student>;
     deleteStudent: (id: string) => Promise<void>;
 }
@@ -43,9 +43,10 @@ export const useStudents = (): UsestudentsReturn => {
         return data.map(item => ({
             id: item.id,
             recordNumber: item.numeroExpediente,
-            firstName: item.personaDTO.nombre,
-            lastName: setLastName(item.personaDTO),
-            email: item.personaDTO.email,
+            idPersona: item.persona.id,
+            firstName: item.persona.nombre,
+            lastName: setLastName(item.persona),
+            email: item.persona.email,
             nationality: item.nacionalidad,
             subjects: item.asignaturas,
             isInternational: item.extranjero,
@@ -54,6 +55,76 @@ export const useStudents = (): UsestudentsReturn => {
             specialNeeds: item.necesidadesEspeciales,
             academicLevels: setAcademicLevels(item.ambitos),
         }));
+    };
+
+    const mapStudentToApi = (student: Student | Omit<Student, 'id'>): StudentApi => {
+        const splitLastName = (lastName: string): { apellido1: string; apellido2: string | null } => {
+            const [apellido1, ...rest] = lastName.split(' ');
+            const apellido2 = rest.join(' ') || null;
+            return { apellido1, apellido2 };
+        };
+
+        const { apellido1, apellido2 } = splitLastName(student.lastName);
+
+        // debo convertir el idioma nativa en un idioma más, y marcarlo como nativo
+        const mapNativeLanguage = (idioma: string): { idioma: { idIdioma: number; nombreIdioma: string }, nivelIdioma: { idNivelIdioma: number; nombreNivelIdioma: string }, nativo: boolean }[] => {
+            // debo crear un idioma con nivel C1 y marcarlo como nativo, luego añadirlo a la lista de idiomas
+            return [{
+                idioma: {
+                    idIdioma: 1,
+                    nombreIdioma: idioma,
+                },
+                nivelIdioma: {
+                    idNivelIdioma: 3,
+                    nombreNivelIdioma: 'C1',
+                },
+                nativo: true,
+            }];
+        };
+
+        // hacer un array de student.languageLevels con el idioma nativo y los demás idiomas
+        const languageLevels = (): { idioma: { idIdioma: number; nombreIdioma: string }, nivelIdioma: { idNivelIdioma: number; nombreNivelIdioma: string }, nativo: boolean }[] => {
+            return [...student.languageLevels, ...mapNativeLanguage(student.nativeLanguage ?? '')];
+        };
+
+        const establecerIdAmbito = (nombreAmbito: string): number => {
+            switch (nombreAmbito) {
+                case 'Matemáticas':
+                    return 1;
+                case 'Lengua':
+                    return 2;
+                case 'Inglés':
+                    return 3;
+                case 'Historia':
+                    return 4;
+                default:
+                    return 0;
+            }
+        };
+
+        return {
+            id: 'id' in student ? student.id : null,
+            numeroExpediente: student.recordNumber,
+            persona: {
+                id: student.idPersona ? student.idPersona : null,
+                nombre: student.firstName,
+                apellido1: apellido1,
+                apellido2: apellido2 ?? '',
+                email: student.email,
+            },
+            asignaturas: student.subjects,
+            necesidadesEspeciales: student.specialNeeds,
+            idiomas: languageLevels(),
+            ambitos: Object.keys(student.academicLevels).map(key => ({
+                ambito: {
+                    idAmbito: establecerIdAmbito(key),
+                    nombreAmbito: key,
+                },
+                nivelAcademico: student.academicLevels[key],
+            })),
+            extranjero: student.isInternational,
+            nacionalidad: student.nationality ? student.nationality : '',
+        };
     };
 
 
@@ -75,8 +146,10 @@ export const useStudents = (): UsestudentsReturn => {
         fetchStudents();
     }, []);
 
-    const createStudent = async (subject: Omit<Student, 'id'>): Promise<Student> => {
-        const newStudent = await studentsApi.create(subject);
+    const createOrUpdateStudent = async (student: Omit<Student, 'id'>): Promise<Student> => {
+        const studentApiFormat = mapStudentToApi(student);
+
+        const newStudent = await studentsApi.create(studentApiFormat);
         await fetchStudents(); // Refresh the list
         return newStudent;
     };
@@ -97,7 +170,7 @@ export const useStudents = (): UsestudentsReturn => {
         loadingStudents,
         errorStudents,
         refetch: fetchStudents,
-        createStudent,
+        createOrUpdateStudent,
         updateStudent,
         deleteStudent
     };

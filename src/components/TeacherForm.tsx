@@ -101,6 +101,7 @@ export default function TeacherFormComponent({
                         </label>
                         <input
                             type="email"
+                            pattern="^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$"
                             id="email"
                             name="email"
                             value={formData.email}

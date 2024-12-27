@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Student } from '../types';
+import {Student, StudentApi} from '../types';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -34,9 +34,17 @@ export const studentsApi = {
         }
     },
 
-    create: async (student: Omit<Student, 'id'>): Promise<Student> => {
+    create: async (student: StudentApi): Promise<Student> => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/student`, student);
+
+            if (!token) {
+                throw new Error('Token no disponible. Por favor, inicia sesión.');
+            }
+            const response = await axios.post(`${API_BASE_URL}/alumnos`, student,  {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error creating student:', error);

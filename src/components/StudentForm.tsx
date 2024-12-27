@@ -8,13 +8,13 @@ import { useNecesidadesEspeciales} from "../hooks/useSpecialNeeds.ts";
 
 
 interface StudentFormProps {
-    onSubmit: (student: Omit<Student, 'id'>) => void;
+    onSubmit: (student: Omit<Student, 'id' | 'idPersona'>) => void;
     onCancel: () => void;
     availableSubjects: Subject[];
     initialData?: Student;
 }
 
-const defaultFormData: Omit<Student, 'id'> = {
+const defaultFormData: Omit<Student, 'id' | 'idPersona'> = {
     firstName: '',
     lastName: '',
     email: '',
@@ -38,8 +38,8 @@ export default function StudentForm({
                                         onCancel,
                                         initialData,
                                     }: StudentFormProps) {
-    const [formData, setFormData] = useState<Omit<Student, 'id'>>(defaultFormData);
-    const { subjects, loading: subjectsLoading, error: subjectsError } = useSubjects();
+    const [formData, setFormData] = useState<Omit<Student, 'id' | 'idPersona'>>(defaultFormData);
+    const { subjects, loadingSubjects: subjectsLoading, errorSubjects: subjectsError } = useSubjects();
     const { nivelesAcademicos, loading: nivelesAcademicosLoading, error: nivelesAcademicosError } = useNivelAmbitoAcademico();
     const { nivelesIdioma, loading: nivelesIdiomaLoading, error: nivelesIdiomaError } = useNivelIdioma();
     const { necesidadesEspeciales, loading: necesidadesEspecialesLoading, error: necesidadesEspecialesError } = useNecesidadesEspeciales();
@@ -53,7 +53,7 @@ export default function StudentForm({
     // Cargar datos iniciales cuando se edita un estudiante existente
     useEffect(() => {
         if (initialData) {
-            const { id, ...studentData } = initialData;   //const { ...studentData } = initialData;
+            const { ...studentData } = initialData;
             setFormData(studentData);
         }
     }, [initialData]);
@@ -108,13 +108,21 @@ export default function StudentForm({
         );
     };
 
-    const handleLanguageLevelChange = (field: keyof typeof formData.languageLevels,  value: number) => {
+    const handleLanguageLevelInputChange = (index: number, value: string) => {
         setFormData((prev) => ({
             ...prev,
-            languageLevelsLevels: {
-                ...prev.languageLevels,
-                [field]: nivelesIdioma.find((level) => level.idNivelIdioma === value) || prev.languageLevels[field],
-            },
+            languageLevels: prev.languageLevels.map((lang, i) =>
+                i === index ? { ...lang, idioma: { ...lang.idioma, nombreIdioma: value.toString() } } : lang
+            ),
+        }));
+    };
+
+    const handleLanguageLevelChange = (index: number, value: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            languageLevels: prev.languageLevels.map((lang, i) =>
+                i === index ? { ...lang, nivelIdioma: nivelesIdioma.find((level) => level.idNivelIdioma === value) || lang.nivelIdioma } : lang
+            ),
         }));
     };
 
@@ -168,6 +176,10 @@ setFormData((prev) => ({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (formData.subjects.length === 0) {
+            alert('Debe añadir al menos una asignatura.');
+            return;
+        }
         onSubmit(formData);
     };
 
@@ -223,7 +235,8 @@ setFormData((prev) => ({
                             Email
                         </label>
                         <input
-                            type="text"
+                            type="email"
+                            pattern="^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$"
                             id="email"
                             name="email"
                             required
@@ -241,7 +254,7 @@ setFormData((prev) => ({
                             id="recordNumber"
                             name="recordNumber"
                             required
-                            value={formData.recordNumber}
+                            value={formData.recordNumber != 0 ? formData.recordNumber : ''}
                             onChange={handleInputChange}
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                         />
@@ -363,7 +376,7 @@ setFormData((prev) => ({
                                 <input
                                     type="text"
                                     value={lang.idioma.nombreIdioma}
-                                    onChange={(e) => handleLanguageLevelChange(index, parseInt(e.target.value))}
+                                    onChange={(e) => handleLanguageLevelInputChange(index, e.target.value)}
                                     placeholder="Idioma"
                                     className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                                 />
@@ -391,7 +404,6 @@ setFormData((prev) => ({
                     </div>
                 </div>
 
-                {/* Special Needs */}
                 {/* Special Needs */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-medium text-gray-900">Necesidades Especiales</h3>

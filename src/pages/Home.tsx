@@ -26,7 +26,7 @@ function Home() {
     });
 
     const [showStudentForm, setShowStudentForm] = useState(false);
-    const { students, loadingStudents, errorStudents } = useStudents();
+    const { students, loadingStudents, errorStudents, createOrUpdateStudent } = useStudents();
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const { createTeacher } = useTeachers();
 
@@ -141,23 +141,15 @@ function Home() {
     };
 
     const handleStudentSubmit = (studentData: Omit<Student, 'id'>) => {
-        if (selectedStudent) {
-         /*   setStudents((prev) =>
-                prev.map((student) =>
-                    student.id === selectedStudent.id
-                        ? {...studentData, id: student.id}
-                        : student
-                )
-            );*/
-        } else {
-         /*   const newStudent: Student = {
-                ...studentData,
-                id: Date.now(),
-            };
-            setStudents((prev) => [...prev, newStudent]);*/
+        if (studentData) {
+            createOrUpdateStudent(studentData).then(() => {
+                setShowStudentForm(false);
+                setSelectedStudent(null);
+            })
+                .catch((error) => {
+                    console.error('Error al guardar el estudiante:', error);
+                });
         }
-        setShowStudentForm(false);
-        setSelectedStudent(null);
     };
 
     return (
