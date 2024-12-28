@@ -7,9 +7,12 @@ import {Student, Subject, TeacherForm as TeacherFormType} from '../types';
 import { useSubjects } from "../hooks/useSubjects.ts";
 import  { useStudents } from "../hooks/useStudents.ts";
 import { useTeachers} from "../hooks/useTeachers.ts";
+import { useAuth } from '../hooks/useAuth';
+import { LoginOverlay } from '../components/auth/LoginOverlay';
 
 
 function Home() {
+    const { isAuthenticated, login } = useAuth();
     const { subjects, loadingSubjects, errorSubjects } = useSubjects();
     const [formData, setFormData] = useState<TeacherFormType>({
         firstName: '',
@@ -39,6 +42,14 @@ function Home() {
         return <p>Error al cargar datos. Por favor, inténtalo de nuevo.</p>;
     }
 
+    //onLogin: (email: string) => Promise<{ success: boolean; message: string }>;
+
+    const handleLogin = async (email: string):  Promise<boolean>=>
+        login(email);// Con arrow function de una línea, el return es implícito
+    
+    if (!isAuthenticated) {
+        return <LoginOverlay onLogin={handleLogin} />;
+    }
 
     const resetFormData = () => {
         setFormData({
