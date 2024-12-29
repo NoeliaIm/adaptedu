@@ -23,6 +23,12 @@ function ChatRoom() {
     const handleSend = async () => {
         if (!input.trim() && !selectedFile) return;
 
+        const formData = new FormData();
+        formData.append('input', input);
+        if (selectedFile) {
+            formData.append('file', selectedFile);
+        }
+
         const userMessage: Message = {
             id: crypto.randomUUID(),
             text: input,
@@ -39,17 +45,14 @@ function ChatRoom() {
 
         try {
 
-            const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJpZ2xlc2lhc20ubm9lbGlhQGdtYWlsLmNvbSIsImlkX3BlcnNvbmEiOjUsIm5vbWJyZSI6Ik5vZWxpYSIsImFwZWxsaWRvIjoiSWdsZXNpYXMiLCJyb2xlcyI6WyJBZG1pbmlzdHJhZG9yIl0sImlhdCI6MTczNDc4NTMyMywiZXhwIjoxNzM1MzkwMTIzfQ.p9cMvaGLjkRCval4s9cz56tPKvT9BCKXtUUAvPEh8yXEVclUxbKv3jFn_RyIgqcnq-tG2Gen9CoMFpm91LEtrgxxLbDcp7ul4G4vJ6yPrUjOptGTEx_nFn34vNMSTmy7RCzVyyf9MEwpb1Svtqf21tikIENmPKSmHLjqP_RbOLPQH51roiRoev8LLsnr23nAhb9i0_Ga-bLXTVBhHhqIS23X2DIEWL83Dx6Ev-bVtRWWgqPb6DwgnjLGQHzZ446dE265pgirIPWs4RR-nujc12K2pZ0MjGpZmYw3bY1dxZyDnPYcThTQXO06nxmfL-tPiRhn1-B9xUDh3_YwGMlTAw";
+            const token = localStorage.getItem('authToken');
             // Llamada al backend
             const response = await fetch('http://localhost:8080/api/edu-assistant/example', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    message: input,
-                }),
+                body: formData
             });
 
             if (!response.ok) {
