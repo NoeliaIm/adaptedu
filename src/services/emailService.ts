@@ -34,14 +34,14 @@ export const sendEmail = async (email: string): Promise<SendEmailResponse> => {
     }
 };
 
-export const verifyEmailToken = async (token: string): Promise<VerifyTokenResponse> => {
+export const verifyEmailToken = async (token: string, email: string): Promise<VerifyTokenResponse> => {
     try {
         const response = await fetch('http://localhost:8080/auth/validar-acceso', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ token }),
+            body: JSON.stringify({ token, email }),
         });
 
         const data = await response.json();

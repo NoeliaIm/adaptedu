@@ -110,3 +110,14 @@ export interface StudentApi {
     extranjero: boolean;
     nacionalidad: string;
 }
+
+
+export interface DecodedToken {
+    sub: string;          // email
+    id_persona: number;
+    nombre: string;
+    apellido: string;
+    roles: string[];
+    iat: number;         // issued at
+    exp: number;         // expiration
+}

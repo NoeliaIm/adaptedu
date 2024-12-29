@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import {useParams, useNavigate, Navigate} from 'react-router-dom';
 import { Save, ArrowLeft } from 'lucide-react';
 import { Subject } from '../types';
 import { useSubjects } from "../hooks/useSubjects.ts";
 import { useCourses } from "../hooks/useCourses.ts";
+import { useAuth } from '../hooks/useAuth';
 
 export default function SubjectForm() {
+    const { userData } = useAuth();
     const { id } = useParams();
     const navigate = useNavigate();
     const { subjects, loadingSubjects, errorSubjects, createOrUpdateSubject} = useSubjects();
@@ -23,6 +25,13 @@ export default function SubjectForm() {
     };
 
     useEffect(() => {
+        if (userData?.roles?.includes("ADMIN")) {
+            console.log("Ejecuto algo solo para administradores");
+        }
+    }, [userData]);
+
+    useEffect(() => {
+
         if (id && subjects.length > 0) {
             const subject = subjects.find(s => s.idAsignatura === Number(id));
             if (subject) {
