@@ -8,7 +8,7 @@ interface ReviewStepProps {
 }
 
 function ReviewStep({ selectedFile, selectedSubject, onSubjectChange }: ReviewStepProps) {
-    const { subjects, loading, error } = useSubjects();
+    const { subjects, loadingSubjects, errorSubjects } = useSubjects();
 
     if (!selectedFile) return null;
 
@@ -16,11 +16,11 @@ function ReviewStep({ selectedFile, selectedSubject, onSubjectChange }: ReviewSt
         return subjects;
     };
 
-    if (loading) {
+    if (loadingSubjects) {
         return <p>Cargando asignaturas...</p>;
     }
 
-    if (error) {
+    if (errorSubjects) {
         return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
     }
     return (

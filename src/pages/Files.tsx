@@ -5,6 +5,7 @@ import ReviewStep from '../components/ReviewStep';
 import ConfirmationStep from '../components/ConfirmationStep';
 import {Subject} from "../types";
 import { useSubjects } from "../hooks/useSubjects.ts";
+import axios from "axios";
 
 interface FileRecord {
     id: string;
@@ -75,7 +76,7 @@ function Files() {
 
     const handleNext = () => {
         if (currentStep === 3) {
-            simulateUpload();
+            uploadFile();
         } else {
             setCurrentStep((prev) => Math.min(prev + 1, 3));
         }
@@ -85,20 +86,38 @@ function Files() {
         setCurrentStep((prev) => Math.max(prev - 1, 1));
     };
 
-    const simulateUpload = () => {
+    const uploadFile = async () => {
+        if (!selectedFile) return;
         setUploadStatus('uploading');
         setUploadProgress(0);
 
-        const interval = setInterval(() => {
-            setUploadProgress((prev) => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setUploadStatus('success');
-                    return 100;
+        const formData = new FormData();
+        formData.append('file', selectedFile, selectedFile.name);
+
+        const token = localStorage.getItem('authToken');
+
+
+        try {
+            const response = await axios.post('http://localhost:8080/api/edu-assistant/upload', formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round(
+                        (progressEvent.loaded * 100) / (progressEvent.total ?? 100)
+                    );
+                    setUploadProgress(progress);
                 }
-                return prev + 10;
             });
-        }, 500);
+
+            if (response.status === 200) {
+                setUploadStatus('success');
+            }
+
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            setUploadStatus('error');
+        }
     };
 
     const handleReset = () => {
