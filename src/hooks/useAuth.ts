@@ -2,10 +2,28 @@ import {useCallback, useEffect, useState} from 'react';
 import {sendEmail, verifyEmailToken} from '../services/emailService';
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from '../types';
+import { isTokenExpired } from '../utils/auth'
 
 export const useAuth = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userData, setUserData] = useState<DecodedToken | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(() => {
+        const token = localStorage.getItem('authToken');
+        return !!token && !isTokenExpired(token);
+    });
+    const [userData, setUserData] = useState<DecodedToken | null>(() => {
+        const token = localStorage.getItem('authToken');
+        if (token && !isTokenExpired(token)) {
+            try {
+                const decoded = jwtDecode<DecodedToken>(token);
+                if (decoded.sub && decoded.id_persona && decoded.roles) {
+                    return decoded;
+                }
+            } catch {
+                return null;
+            }
+        }
+        return null;
+    });
+
 
     const login = async (email: string)  => {
         try {
@@ -35,36 +53,26 @@ export const useAuth = () => {
 
     const verifyStoredToken = useCallback(async () => {
         const token = localStorage.getItem('authToken');
-        if (!token) {
+        if (!token || isTokenExpired(token)) {
             setIsAuthenticated(false);
+            setUserData(null);
             return false;
         }
 
         try {
-            const decodedToken = jwtDecode<DecodedToken>(token);
-
-            // Verificar que todos los campos necesarios existan
-            if (!decodedToken.sub || !decodedToken.id_persona || !decodedToken.roles) {
-                setIsAuthenticated(false);
-                setUserData(null);
-                return false;
+            const decoded = jwtDecode<DecodedToken>(token);
+            if (!decoded.sub || !decoded.id_persona || !decoded.roles) {
+                throw new Error('Invalid token data');
             }
 
-            // Verificar expiración
-            if (decodedToken.exp * 1000 < Date.now()) {
-                setIsAuthenticated(false);
-                setUserData(null);
-                return false; // No borramos el token, solo reportamos que no es válido
-            }
-
-            setUserData(decodedToken);
+            setUserData(decoded);
             setIsAuthenticated(true);
             return true;
-        } catch (error) {
-            console.error('Error decodificando token:', error);
+        } catch {
+            localStorage.removeItem('authToken');
             setIsAuthenticated(false);
             setUserData(null);
-            return false; // No borramos el token automáticamente
+            return false;
         }
     }, []);
 

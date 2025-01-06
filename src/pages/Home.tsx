@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import TeacherForm from '../components/TeacherForm';
 import StudentSearch from '../components/StudentSearch';
 import StudentForm from '../components/StudentForm';
@@ -12,7 +12,8 @@ import { useAuth } from '../hooks/useAuth';
 
 function Home() {
     const { subjects, loadingSubjects, errorSubjects } = useSubjects();
-    const { userData } = useAuth();
+    const { userData ,  verifyStoredToken } = useAuth();
+    const [isVerifying, setIsVerifying] = useState(true);
     const [formData, setFormData] = useState<TeacherFormType>({
         firstName: '',
         lastName: '',
@@ -32,9 +33,22 @@ function Home() {
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const { createTeacher } = useTeachers();
 
+    useEffect(() => {
+        const verify = async () => {
+            setIsVerifying(true);
+            await verifyStoredToken();
+            setIsVerifying(false);
+        };
+        verify();
+    }, [verifyStoredToken]);
 
-    if (loadingSubjects || loadingStudents) {
+
+    if (isVerifying || loadingSubjects || loadingStudents) {
         return <p>Cargando datos...</p>;
+    }
+
+    if (!userData) {
+        return null;
     }
 
     if (errorSubjects || errorStudents) {

@@ -1,10 +1,10 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 
 interface PrivateRouteProps {
     children: React.ReactNode;
-    roles?: string[];
+    roles: string[];
 }
 
 const PrivateRoute = ({ children, roles }: PrivateRouteProps) => {
@@ -14,37 +14,49 @@ const PrivateRoute = ({ children, roles }: PrivateRouteProps) => {
 
     useEffect(() => {
         const verify = async () => {
-            try {
-                await verifyStoredToken();
-            } finally {
-                setIsVerifying(false);
-            }
+            setIsVerifying(true);
+            await verifyStoredToken();
+            setIsVerifying(false);
         };
         verify();
-    }, []);
+    }, [verifyStoredToken]);
+
+
+    const getDefaultRoute = () => {
+        if (!userData) return '/login';
+
+        // Definir rutas por defecto según el rol
+        if (userData.roles.includes('ALUM')) return '/chat';
+        if (userData.roles.includes('PROF')) return '/';
+        if (userData.roles.includes('ADMIN')) return '/';
+
+        return '/login';
+    };
 
     if (isVerifying) {
-        return <div>Cargando...</div>;
+        return null;
     }
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !userData) {
+        console.log('No autenticado, redirigiendo a login');
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    if (roles && userData?.roles) {
-        console.log('Roles requeridos:', roles); // Logs los roles necesarios
-        console.log('Roles del usuario:', userData.roles); // Logs los roles del usuario
 
-        const hasRequiredRole = roles.some(role =>
-            userData.roles.includes(role)
-        );
+    // Si el usuario es ADMIN, permitir acceso sin importar los roles requeridos
+    if (userData.roles.includes('ADMIN')) {
+        console.log('Usuario es ADMIN, acceso permitido');
+        return <>{children}</>;
+    }
 
-        console.log('¿Usuario tiene rol requerido?', hasRequiredRole);
+    const hasRequiredRole = roles.some(role =>
+        userData.roles.includes(role)
+    );
 
-        if (!hasRequiredRole) {
-            console.warn('Acceso denegado. Usuario no tiene el rol requerido.');
-            return <Navigate to="/" replace />;
-        }
+
+    if (!hasRequiredRole) {
+        console.warn('Acceso denegado. Usuario no tiene el rol requerido.');
+        return <Navigate to={getDefaultRoute()} replace />;
     }
 
     return <>{children}</>;

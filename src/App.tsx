@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import {Routes, Route, Navigate} from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Chat from './pages/ChatRoom';
@@ -8,69 +8,79 @@ import SubjectForm from './pages/SubjectForm';
 import VerifyAuth from './pages/VerifyAuth';
 import {LoginPage} from "./pages/LoginPage.tsx";
 import PrivateRoute from './components/PrivateRoute';
+import {useEffect, useState} from "react";
+import {useAuth} from "./hooks/useAuth.ts";
 
 
 function App() {
+    const { verifyStoredToken } = useAuth();
+    const [isVerifying, setIsVerifying] = useState(true);
+
+    useEffect(() => {
+        const verify = async () => {
+            setIsVerifying(true);
+            await verifyStoredToken();
+            setIsVerifying(false);
+        };
+        verify();
+    }, [verifyStoredToken]);
+
+    if (isVerifying) {
+        return <p>Cargando datos...</p>;
+    }
+
     return (
         <Routes>
             {/* Rutas públicas */}
-
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/verify" element={<VerifyAuth />} />
 
             {/* Rutas protegidas */}
-
-            <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route path="chat" element={<Chat />} />
-                <Route path="files" element={<Files />} />
-                <Route path="student/:id" element={<StudentAnalytics />} />
-                <Route path="subject/new" element={<SubjectForm />} />
-                <Route path="subject/:id" element={<SubjectForm />} />
-            </Route>
-        </Routes>
-        /*<Routes>
-            {/!* Rutas públicas *!/}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/auth/verify" element={<VerifyAuth />} />
-
-            {/!* Rutas protegidas *!/}
             <Route
                 path="/"
                 element={
-                    <PrivateRoute roles={['Profesor', 'Estudiante']}>
+                    <PrivateRoute roles={['PROF', 'ALUM', 'ADMIN']}>
                         <Layout />
                     </PrivateRoute>
                 }
             >
-                <Route index element={<Home />} />
+                <Route
+                    index
+                    element={
+                        <PrivateRoute roles={['PROF', 'ADMIN']}>
+                            <Home />
+                        </PrivateRoute>
+                    }
+                />
+
                 <Route path="chat" element={
-                    <PrivateRoute roles={['Profesor', 'Estudiante']}>
+                    <PrivateRoute roles={['PROF', 'ALUM', 'ADMIN']}>
                         <Chat />
                     </PrivateRoute>
                 } />
                 <Route path="files" element={
-                    <PrivateRoute roles={['Profesor']}>
+                    <PrivateRoute roles={['PROF', 'ADMIN']}>
                         <Files />
                     </PrivateRoute>
                 } />
                 <Route path="student/:id" element={
-                    <PrivateRoute roles={['Profesor']}>
+                    <PrivateRoute roles={['PROF', 'ADMIN']}>
                         <StudentAnalytics />
                     </PrivateRoute>
                 } />
                 <Route path="subject/new" element={
-                    <PrivateRoute roles={['Profesor']}>
+                    <PrivateRoute roles={['PROF', 'ADMIN']}>
                         <SubjectForm />
                     </PrivateRoute>
                 } />
                 <Route path="subject/:id" element={
-                    <PrivateRoute roles={['Profesor']}>
+                    <PrivateRoute roles={['PROF', 'ADMIN']}>
                         <SubjectForm />
                     </PrivateRoute>
                 } />
             </Route>
-        </Routes>*/
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
 
     );
 }

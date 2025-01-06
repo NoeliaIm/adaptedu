@@ -1,10 +1,19 @@
-import { useState } from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { useState} from 'react';
+import {Outlet, NavLink} from 'react-router-dom';
 import {FileText, Home, MessageSquare,  Menu, X } from 'lucide-react';
+import {useAuth} from "../hooks/useAuth.ts";
+import {useRoleCheck} from "../hooks/useRolCheck.ts";
 
 export default function Layout() {
 
     const [isMenuOpen, setIsMenuOpen] = useState(true);
+    const { isAuthenticated } = useAuth();
+    const { hasRole } = useRoleCheck();
+
+    // Si no está autenticado, no renderizar nada mientras se verifica
+    if (!isAuthenticated) {
+        return null;
+    }
 
     return (
         <div className="flex h-screen">
@@ -29,7 +38,7 @@ export default function Layout() {
                         <h1 className="text-xl font-bold text-gray-800">School Management</h1>
                     </div>
                     <ul className="space-y-2">
-                        <li>
+                        <li className={`${!hasRole(['PROF', 'ADMIN']) ? 'hidden' : ''}`}>
                             <NavLink
                                 to="/"
                                 className={({ isActive }) =>
@@ -59,7 +68,7 @@ export default function Layout() {
                                 Chat Assistant
                             </NavLink>
                         </li>
-                        <li>
+                        <li className={`${!hasRole(['PROF', 'ADMIN']) ? 'hidden' : ''}`}>
                             <NavLink
                                 to="/files"
                                 className={({ isActive }) =>

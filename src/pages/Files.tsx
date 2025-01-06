@@ -87,12 +87,13 @@ function Files() {
     };
 
     const uploadFile = async () => {
-        if (!selectedFile) return;
+        if (!selectedFile || !selectedSubject) return;
         setUploadStatus('uploading');
         setUploadProgress(0);
 
         const formData = new FormData();
         formData.append('file', selectedFile, selectedFile.name);
+        formData.append('subjectId', selectedSubject);
 
         const token = localStorage.getItem('authToken');
 

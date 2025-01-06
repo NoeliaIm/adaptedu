@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import { PlusCircle, MinusCircle, GraduationCap, Save, X } from 'lucide-react';
 import { TeacherForm, Subject } from '../types';
 import {useSubjects} from "../hooks/useSubjects.ts";
+import {useRoleCheck} from "../hooks/useRolCheck.ts";
 
 
 interface TeacherFormProps {
@@ -27,6 +28,7 @@ export default function TeacherFormComponent({
                                                  submitted,
                                                  onResetForm
                                              }: TeacherFormProps) {
+    const { hasRole } = useRoleCheck();
     const [showSummary, setShowSummary] = useState(true);
     const { subjects, loadingSubjects, errorSubjects } = useSubjects();
 
@@ -44,6 +46,8 @@ export default function TeacherFormComponent({
     if (errorSubjects) {
         return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
     }
+
+    if (!hasRole(['ADMIN'])) return null;
 
     const handleResetForm = (showSummary: boolean) => {
         setShowSummary(showSummary);

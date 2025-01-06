@@ -3,6 +3,7 @@ import { Search, UserPlus, PencilIcon, Trash2, Eye, AlertCircle } from 'lucide-r
 import { useNavigate } from 'react-router-dom';
 import {Student} from '../types';
 import { useSubjects } from "../hooks/useSubjects.ts";
+import {useRoleCheck} from "../hooks/useRolCheck.ts";
 
 interface StudentSearchProps {
     filters: {
@@ -28,6 +29,7 @@ export default function StudentSearch({
     const navigate = useNavigate();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
     const { subjects, loadingSubjects, errorSubjects } = useSubjects();
+    const { hasRole } = useRoleCheck();
 
     const getAvailableSubjects = () => {
         return subjects;
@@ -50,6 +52,7 @@ export default function StudentSearch({
         <div className="bg-white rounded-xl shadow-lg p-8">
         <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Búsqueda de Alumnos</h2>
+            {hasRole(['ADMIN']) && (
     <button
     onClick={onAddStudent}
     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -57,6 +60,7 @@ export default function StudentSearch({
     <UserPlus className="w-4 h-4 mr-2" />
         Añadir Alumno
     </button>
+                )}
     </div>
 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
@@ -167,6 +171,7 @@ export default function StudentSearch({
                         >
                             <PencilIcon className="w-5 h-5"/>
                         </button>
+                        {hasRole(['ADMIN']) && (
                         <button
                             onClick={() => setShowDeleteConfirm(student.id)}
                             className="text-red-600 hover:text-red-900 transition-colors"
@@ -174,6 +179,7 @@ export default function StudentSearch({
                         >
                             <Trash2 className="w-5 h-5"/>
                         </button>
+                        )}
                     </div>
                 </td>
             </tr>
