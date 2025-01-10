@@ -45,7 +45,6 @@ const PrivateRoute = ({ children, roles }: PrivateRouteProps) => {
 
     // Si el usuario es ADMIN, permitir acceso sin importar los roles requeridos
     if (userData.roles.includes('ADMIN')) {
-        console.log('Usuario es ADMIN, acceso permitido');
         return <>{children}</>;
     }
 

@@ -3,49 +3,9 @@ import { Search, Trash2, AlertCircle } from 'lucide-react';
 import FileUploadStep from '../components/FileUploadStep';
 import ReviewStep from '../components/ReviewStep';
 import ConfirmationStep from '../components/ConfirmationStep';
-import {Subject} from "../types";
 import { useSubjects } from "../hooks/useSubjects.ts";
 import axios from "axios";
-
-interface FileRecord {
-    id: string;
-    name: string;
-    subject: Subject;
-    uploadDate: Date;
-    size: number;
-}
-
-// Mock data for demonstration
-const mockFiles: FileRecord[] = [
-    {
-        id: '1',
-        name: 'Examen_Matematicas_1T.pdf',
-        subject: {
-            idAsignatura: 1,
-            nombreAsignatura: 'Matemáticas',
-            nombreCurso: '1º ESO',
-            descripcion: 'Matemáticas generales y cálculo',
-            acron: 'MAT',
-            idCurso: 1
-        },
-        uploadDate: new Date('2024-03-15'),
-        size: 1500000,
-    },
-    {
-        id: '2',
-        name: 'Trabajo_Literatura.docx',
-        subject: {
-            idAsignatura: 2,
-            nombreAsignatura: 'Lengua',
-            nombreCurso: '1º ESO',
-            descripcion: 'Lengua castellana y literatura',
-            acron: 'LEN',
-            idCurso: 1
-        },
-        uploadDate: new Date('2024-03-14'),
-        size: 2500000,
-    },
-];
+import {useArchivo} from "../hooks/useArchivo.ts";
 
 function Files() {
     const [showUpload, setShowUpload] = useState(false);
@@ -54,10 +14,10 @@ function Files() {
     const [selectedSubject, setSelectedSubject] = useState('');
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
-    const [files, setFiles] = useState<FileRecord[]>(mockFiles);
     const [filters, setFilters] = useState({ name: '', subject: '' });
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
     const { subjects, loadingSubjects, errorSubjects } = useSubjects();
+    const { archivos, deleteArchivo, loadingArchivos, errorArchivos } = useArchivo();
 
     const handleFileSelect = (file: File | null) => {
         setSelectedFile(file);
@@ -67,11 +27,23 @@ function Files() {
         return subjects;
     };
 
+    const getArchivos = () => {
+        return archivos;
+    }
+
     if (loadingSubjects) {
         return <p>Cargando asignaturas...</p>;
     }
     if (errorSubjects) {
         return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    }
+
+    if(loadingArchivos){
+        return <p>Cargando archivos...</p>;
+    }
+
+    if(errorArchivos){
+        return <p>Error al cargar archivos. Por favor, inténtalo de nuevo.</p>;
     }
 
     const handleNext = () => {
@@ -134,14 +106,14 @@ function Files() {
         setFilters(prev => ({ ...prev, [name]: value }));
     };
 
-    const filteredFiles = files.filter(file => {
-        const nameMatch = file.name.toLowerCase().includes(filters.name.toLowerCase());
-        const subjectMatch = !filters.subject || file.subject.idAsignatura === parseInt(filters.subject);
+    const filteredFiles = getArchivos().filter(file => {
+        const nameMatch = file.nombreArchivo.toLowerCase().includes(filters.name.toLowerCase());
+        const subjectMatch = !filters.subject || file.asignatura.idAsignatura === parseInt(filters.subject);
         return nameMatch && subjectMatch;
     });
 
-    const handleDelete = (fileId: string) => {
-        setFiles(prev => prev.filter(file => file.id !== fileId));
+    const handleDelete = async (fileId: number) => {
+        await deleteArchivo(fileId);
         setShowDeleteConfirm(null);
     };
 
@@ -294,22 +266,22 @@ function Files() {
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
                                     {filteredFiles.map((file) => (
-                                        <tr key={file.id} className="hover:bg-gray-50">
+                                        <tr key={file.idArchivo} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {file.name}
+                                                {file.nombreArchivo}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {file.subject.nombreAsignatura}
+                                                {file.asignatura.nombreAsignatura}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {file.uploadDate.toLocaleDateString()}
+                                                {file.fechaSubida}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {(file.size / 1024 / 1024).toFixed(2)} MB
+                                                {file.tamanio}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
-                                                    onClick={() => setShowDeleteConfirm(file.id)}
+                                                    onClick={() => setShowDeleteConfirm(file.idArchivo)}
                                                     className="text-red-600 hover:text-red-900"
                                                     title="Eliminar archivo"
                                                 >

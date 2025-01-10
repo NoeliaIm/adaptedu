@@ -121,3 +121,12 @@ export interface DecodedToken {
     iat: number;         // issued at
     exp: number;         // expiration
 }
+
+
+export interface Archivo{
+    idArchivo: number;
+    nombreArchivo: string;
+    asignatura: Subject;
+    fechaSubida: string;
+    tamanio: string;
+}
