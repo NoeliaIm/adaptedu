@@ -274,7 +274,7 @@ function Files() {
                                                 {file.asignatura.nombreAsignatura}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {file.fechaSubida}
+                                                {new Date(file.fechaSubida).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {file.tamanio}
