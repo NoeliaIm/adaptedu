@@ -1,84 +1,20 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { LineChart, BarChart, Activity, BookOpen,  ArrowLeft } from 'lucide-react';
-import { mockStudents } from '../mockData';
-import { useSubjects } from "../hooks/useSubjects.ts";
-
-// Mock data for analytics
-const mockAnalytics = {
-    appUsage: [
-        { month: 'Enero', visits: 23 },
-        { month: 'Febrero', visits: 45 },
-        { month: 'Marzo', visits: 32 },
-        { month: 'Abril', visits: 67 },
-        { month: 'Mayo', visits: 89 },
-    ],
-    subjectUsage: [
-        { subject: {
-                idAsignatura: 1,
-                nombreAsignatura: 'Matemáticas',
-                nombreCurso: '1º ESO',
-                descripcion: 'Matemáticas generales y cálculo',
-                acron: 'MAT'
-            }, queries: 156 },
-        { subject: {
-                idAsignatura: 2,
-                nombreAsignatura: 'Lengua',
-                nombreCurso: '1º ESO',
-                descripcion: 'Lengua castellana y literatura',
-                acron: 'LEN'
-            }, queries: 89 },
-        { subject: {
-                idAsignatura: 3,
-                nombreAsignatura: 'Inglés',
-                nombreCurso: '1º ESO',
-                descripcion: 'Inglés como lengua extranjera',
-                acron: 'ING'
-            }, queries: 134 },
-        { subject: {
-                idAsignatura: 4,
-                nombreAsignatura: 'Historia',
-                nombreCurso: '1º ESO',
-                descripcion: 'Historia universal y de España',
-                acron: 'HIS'
-            }, queries: 45 },
-    ],
-    grades: [
-        { subject: {
-                idAsignatura: 1,
-                nombreAsignatura: 'Matemáticas',
-                nombreCurso: '1º ESO',
-                descripcion: 'Matemáticas generales y cálculo',
-                acron: 'MAT'
-            }, ev1: 7.5, ev2: 8.0, ev3: 8.5 },
-        { subject: {
-                idAsignatura: 2,
-                nombreAsignatura: 'Lengua',
-                nombreCurso: '1º ESO',
-                descripcion: 'Lengua castellana y literatura',
-                acron: 'LEN'
-            }, ev1: 6.5, ev2: 7.0, ev3: 7.5 },
-        { subject: {
-                idAsignatura: 3,
-                nombreAsignatura: 'Inglés',
-                nombreCurso: '1º ESO',
-                descripcion: 'Inglés como lengua extranjera',
-                acron: 'ING'
-            }, ev1: 8.0, ev2: 8.5, ev3: 9.0 },
-        { subject: {
-                idAsignatura: 4,
-                nombreAsignatura: 'Historia',
-                nombreCurso: '1º ESO',
-                descripcion: 'Historia universal y de España',
-                acron: 'HIS'
-            }, ev1: 7.0, ev2: 7.5, ev3: 8.0 },
-    ]
-};
+import { useStudentAnalytics } from '../hooks/useStudentAnalytics';
 
 export default function StudentAnalytics() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const student = mockStudents.find(s => s.id === Number(id));
-    const { subjects, loadingSubjects, errorSubjects } = useSubjects();
+    const location = useLocation();
+    const student = location.state?.studentData;
+
+    const {
+        evolucionAcademica,
+        loadingStudentAnalytics,
+        errorStudentAnalytics
+    } = useStudentAnalytics({
+        idAlumno: Number(id)
+    });
 
     if (!student) {
         return (
@@ -91,16 +27,23 @@ export default function StudentAnalytics() {
         );
     }
 
-    const getAvailableSubjects = () => {
-        return subjects;
-    };
-
-    if (loadingSubjects) {
-        return <p>Cargando asignaturas...</p>;
+    if (!evolucionAcademica || evolucionAcademica.length === 0) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-gray-900">No hay datos disponibles</h2>
+                    <p className="mt-2 text-gray-600">No se encontraron datos académicos para este estudiante.</p>
+                </div>
+            </div>
+        );
     }
 
-    if (errorSubjects) {
-        return <p>Error al cargar asignaturas. Por favor, inténtalo de nuevo.</p>;
+    if (loadingStudentAnalytics) {
+        return <p>Cargando datos...</p>;
+    }
+
+    if (errorStudentAnalytics)  {
+        return <p>Error al cargar los datos. Por favor, inténtalo de nuevo.</p>;
     }
 
 
@@ -139,7 +82,7 @@ export default function StudentAnalytics() {
                         </div>
                         <div className="mt-4">
                             <p className="text-sm text-gray-600">
-                                Total de visitas: {mockAnalytics.appUsage.reduce((acc, curr) => acc + curr.visits, 0)}
+                                Total de visitas: {evolucionAcademica.reduce((acc, curr) => acc + curr.consultasPorAsignatura, 0)}
                             </p>
                         </div>
                     </div>
@@ -151,24 +94,30 @@ export default function StudentAnalytics() {
                             <BookOpen className="w-5 h-5 text-indigo-600"/>
                         </div>
                         <div className="h-64">
-                            {mockAnalytics.subjectUsage.map(({subject, queries}) => (
-                                <div key={subject.idAsignatura} className="mb-4">
-                                    <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-600">
-                      {getAvailableSubjects().find(s => s.idAsignatura === subject.idAsignatura)?.nombreAsignatura}
-                    </span>
-                                        <span className="text-sm text-gray-500">{queries} consultas</span>
+                            {evolucionAcademica.map((evolucion) => {
+                                const maxConsultas = Math.max(...evolucionAcademica.map(e => e.consultasPorAsignatura || 0));
+                                return (
+                                    <div key={evolucion.asignatura} className="mb-4">
+                                        <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-600">
+                                {evolucion.asignatura}
+                            </span>
+                                            <span className="text-sm text-gray-500">
+                                {evolucion.consultasPorAsignatura || 0} consultas
+                            </span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div
+                                                className="bg-indigo-600 h-2 rounded-full"
+                                                style={{
+                                                    width: maxConsultas === 0 ? '0%' :
+                                                        `${((evolucion.consultasPorAsignatura || 0) / maxConsultas) * 100}%`
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                        <div
-                                            className="bg-indigo-600 h-2 rounded-full"
-                                            style={{
-                                                width: `${(queries / Math.max(...mockAnalytics.subjectUsage.map(s => s.queries))) * 100}%`
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -185,49 +134,62 @@ export default function StudentAnalytics() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Asignatura
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        2021-22
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        2022-23
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        2023-24
-                                    </th>
+                                    {/* Obtener todos los años únicos de todas las asignaturas */}
+                                    {Array.from(new Set(
+                                        evolucionAcademica.flatMap(ea => Object.keys(ea.calificacionesPorAnio))
+                                    )).sort().map((anio) => (
+                                        <th key={anio}
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            {anio}
+                                        </th>
+                                    ))}
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Evolución
                                     </th>
                                 </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                {mockAnalytics.grades.map((grade) => (
-                                    <tr key={grade.subject.idAsignatura}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {getAvailableSubjects().find(s => s.idAsignatura === grade.subject.idAsignatura)?.nombreAsignatura}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {grade.ev1}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {grade.ev2}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {grade.ev3}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            grade.ev3 > grade.ev1
-                                ? 'bg-green-100 text-green-800'
-                                : grade.ev3 < grade.ev1
-                                    ? 'bg-red-100 text-red-800'
-                                    : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {grade.ev3 > grade.ev1 ? '↑' : grade.ev3 < grade.ev1 ? '↓' : '→'}
-                            {Math.abs(grade.ev3 - grade.ev1).toFixed(1)} puntos
-                        </span>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {evolucionAcademica.map((evolucion) => {
+                                    const todosLosAnios = Array.from(new Set(
+                                        evolucionAcademica.flatMap(ea => Object.keys(ea.calificacionesPorAnio))
+                                    )).sort();
+
+                                    // Encontrar la primera y última nota disponible
+                                    const notasDisponibles = todosLosAnios
+                                        .map(anio => evolucion.calificacionesPorAnio[anio])
+                                        .filter(nota => nota !== undefined);
+                                    const primeraNota = notasDisponibles[0];
+                                    const ultimaNota = notasDisponibles[notasDisponibles.length - 1];
+                                    const diferencia = ultimaNota - primeraNota;
+
+                                    return (
+                                        <tr key={evolucion.asignatura}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                {evolucion.asignatura}
+                                            </td>
+                                            {todosLosAnios.map(anio => (
+                                                <td key={anio}
+                                                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {evolucion.calificacionesPorAnio[anio] || '-'}
+                                                </td>
+                                            ))}
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {notasDisponibles.length > 1 && (
+                                                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                                        diferencia > 0
+                                                            ? 'bg-green-100 text-green-800'
+                                                            : diferencia < 0
+                                                                ? 'bg-red-100 text-red-800'
+                                                                : 'bg-yellow-100 text-yellow-800'
+                                                    }`}>
+                                    {diferencia > 0 ? '↑' : diferencia < 0 ? '↓' : '→'}
+                                                        {Math.abs(diferencia).toFixed(1)} puntos
+                                </span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                                 </tbody>
                             </table>
                         </div>

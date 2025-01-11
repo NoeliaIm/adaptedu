@@ -130,3 +130,13 @@ export interface Archivo{
     fechaSubida: string;
     tamanio: string;
 }
+
+export interface CalificacionPorAnio {
+    [anio: string]: number;
+}
+
+export interface EvolucionAcademica {
+    asignatura: string;
+    calificacionesPorAnio: CalificacionPorAnio;
+    consultasPorAsignatura: number;
+}

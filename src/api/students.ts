@@ -24,16 +24,6 @@ const token = localStorage.getItem('authToken');
         }
     },
 
-    getById: async (id: string): Promise<Student> => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/alumnos/${id}`);
-            return response.data;
-        } catch (error) {
-            console.error(`Error fetching student ${id}:`, error);
-            throw error;
-        }
-    },
-
     create: async (student: StudentApi): Promise<Student> => {
         try {
 

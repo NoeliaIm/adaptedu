@@ -158,7 +158,15 @@ export default function StudentSearch({
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-3">
                         <button
-                            onClick={() => navigate(`/student/${student.id}`)}
+                            onClick={() => navigate(`/student/${student.id}`, {
+                                state: {
+                                    studentData: {
+                                        firstName: student.firstName,
+                                        lastName: student.lastName,
+                                        recordNumber: student.recordNumber
+                                    }
+                                }
+                            })}
                             className="text-blue-600 hover:text-blue-900 transition-colors"
                             title="Ver estadísticas"
                         >
