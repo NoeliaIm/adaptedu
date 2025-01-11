@@ -3,6 +3,7 @@ import { PlusCircle, Pencil, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSubjects } from "../hooks/useSubjects.ts";
 import {useCourses} from "../hooks/useCourses.ts";
+import {useRoleCheck} from "../hooks/useRolCheck.ts";
 
 export default function SubjectList() {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function SubjectList() {
 
     const { subjects, loadingSubjects, errorSubjects } = useSubjects();
     const { courses } = useCourses();
+    const { hasRole } = useRoleCheck();
 
     const getAvailableCourses = () => {
         return courses;
@@ -48,6 +50,7 @@ export default function SubjectList() {
         <div className="bg-white rounded-xl shadow-lg p-8">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Asignaturas</h2>
+                {hasRole(['ADMIN']) && (
                 <button
                     onClick={() => navigate('/subject/new')}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -55,6 +58,7 @@ export default function SubjectList() {
                     <PlusCircle className="w-4 h-4 mr-2" />
                     Añadir Asignatura
                 </button>
+                )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-6">
