@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { LineChart, BarChart, Activity, BookOpen,  ArrowLeft } from 'lucide-react';
+import { BarChart, BookOpen,  ArrowLeft } from 'lucide-react';
 import { useStudentAnalytics } from '../hooks/useStudentAnalytics';
+import AppUsageAnalytics from "../components/AppUsageAnalytics.tsx";
 
 export default function StudentAnalytics() {
     const { id } = useParams();
@@ -71,21 +72,7 @@ export default function StudentAnalytics() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* App Usage Analytics */}
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold text-gray-900">Uso de la Aplicación</h2>
-                            <Activity className="w-5 h-5 text-indigo-600"/>
-                        </div>
-                        <div className="h-64 flex items-center justify-center">
-                            <LineChart className="w-12 h-12 text-gray-400"/>
-                            <span className="ml-2 text-gray-500">Gráfico de uso temporal</span>
-                        </div>
-                        <div className="mt-4">
-                            <p className="text-sm text-gray-600">
-                                Total de visitas: {evolucionAcademica.reduce((acc, curr) => acc + curr.consultasPorAsignatura, 0)}
-                            </p>
-                        </div>
-                    </div>
+                    <AppUsageAnalytics evolucionAcademica={evolucionAcademica} />
 
                     {/* Subject Usage */}
                     <div className="bg-white rounded-lg shadow-sm p-6">

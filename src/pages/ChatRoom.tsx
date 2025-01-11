@@ -47,7 +47,7 @@ function ChatRoom() {
 
             const token = localStorage.getItem('authToken');
             // Llamada al backend
-            const response = await fetch('http://localhost:8080/api/edu-assistant/example', {
+            const response = await fetch('http://localhost:8080/api/edu-assistant/chat', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
