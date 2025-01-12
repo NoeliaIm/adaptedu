@@ -3,6 +3,8 @@ import { Send, FileUp, Download, Bot, User, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import remarkGfm from "remark-gfm";
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
     id: string;
@@ -115,6 +117,20 @@ function ChatRoom() {
         pdf.save(`chat-export-${format(new Date(), 'yyyy-MM-dd-HH-mm')}.pdf`);
     };
 
+    const MessageContent = ({ text, sender }: { text: string, sender: 'user' | 'bot' }) => (
+        <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            className={`prose prose-sm max-w-none ${
+                sender === 'user'
+                    ? 'prose-invert' // Esto hará que el texto sea blanco
+                    : 'dark:prose-invert'
+            }`}
+        >
+            {text}
+        </ReactMarkdown>
+    );
+
+
     return (
         <div className="flex flex-col h-screen bg-gray-50">
             {/* Header */}
@@ -167,11 +183,11 @@ function ChatRoom() {
                             <div
                                 className={`rounded-lg px-4 py-2 ${
                                     message.sender === 'user'
-                                        ? 'bg-indigo-600 text-white'
+                                        ? 'bg-indigo-600 text-white text-sm'
                                         : 'bg-white border border-gray-200'
                                 }`}
                             >
-                                <div className="text-sm">{message.text}</div>
+                                <MessageContent text={message.text} sender={message.sender}/>
                                 {message.file && (
                                     <div className="mt-2 flex items-center text-sm">
                                         <Paperclip className="w-4 h-4 mr-1" />
